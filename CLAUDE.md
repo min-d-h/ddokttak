@@ -63,6 +63,7 @@ Frozen Ape 의 "Tempo" 앱을 닮은 개인용 메트로놈 앱. Flutter 로 만
   - 박마다 화면 깜빡임, 박 진행 막대(기본 왕복·진자 운동, 양 끝 눈금), 스킨 5종(라이트 포함, 글자 대비 4.5 이상)
   - 곡 보관함 → 담기 → 폴더(연주목록), 업데이트/새로 저장, 밀어서 빼기, SQLite 저장
   - 화면 꺼짐·무음 스위치 재생(Playback 세션), 전화 끼어들기 처리
+  - 앱 아이콘: 시안 A "박 칸"
   - iPhone 설치(무료 Personal Team), 테스트 349개
   - 남은 것 / 다음 버전 후보: 블루투스 화면 맞춤(자동 지연 + 보정 슬라이더), Android(포그라운드 서비스), 박 간격 정밀 측정, 유료화, UI 를 iOS 스타일로(Swift 전환은 나중에 논의)
 
@@ -127,3 +128,4 @@ Frozen Ape 의 "Tempo" 앱을 닮은 개인용 메트로놈 앱. Flutter 로 만
 - 화면 꺼짐 재생 수정 (2026-11-04): flutter_soloud 는 iOS 세션 종류를 정하지 않아(miniaudio sessionCategory none → 기본 SoloAmbient) 화면을 끄거나 무음 스위치를 켜면 멈췄다. `lib/audio/audio_session_controller.dart` 에서 앱 시작 때 Playback + mixWithOthers 로 설정·활성화. 전화 등 끼어들기 시작 → 재생 멈춤, 끝 → 세션 다시 켬. 실기기 확인 필요 (화면 잠금 20분, 무음 스위치, 음악 앱과 같이, 전화 수신).
 - BPM 조절판 제스처 (2026-11-04, `lib/ui/widgets/bpm_gestures.dart`): +/− 는 닿는 순간 1, 0.4초 넘게 누르면 0.11초마다 반복, 누른 지 1.5초부터 5씩. 떼기·버튼 밖으로 미끄러짐·터치 취소·20/300 끝이면 멈춤 (누른 시간은 반복 횟수로 셈). 가운데 숫자 영역 좌우 끌기: 10픽셀에 1, 빠르면 2배. 끌기는 숫자 영역에서만(버튼과 겹치지 않음). 바뀔 때마다 짧은 진동. 테스트 `test/ui/bpm_gestures_test.dart`.
 - 보류: 블루투스 지연 — 화면 자동 맞춤(iOS outputLatency) + ⚙ 화면 타이밍 보정 슬라이더 제안, 사용자 답 대기. UI 를 Swift 로 바꾸는 건 나중에 다시 논의 (추천: Flutter 유지 + iOS 스타일 부품).
+- 앱 아이콘 (2026-11-04): 시안 A "박 칸" (높이가 다른 세로 막대 4개 + 박 진행 막대, 남색 그라데이션 + 하늘색). 원본 생성 `flutter test tool/icon_drafts_test.dart` → `build/icons/draft_A_beat_cells.png`. iOS·macOS·Android 아이콘 27개를 같은 그림으로 교체 (iOS 는 투명 채널 없음).
