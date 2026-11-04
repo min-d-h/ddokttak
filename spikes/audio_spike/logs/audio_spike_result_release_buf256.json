@@ -1,0 +1,429 @@
+{
+  "when": "2026-11-04T11:50:37.684326",
+  "flutter_soloud": "5.2.2",
+  "bufferForScenarios": 256,
+  "secondsPerSteadyRun": 60,
+  "S1_clock_buf512": {
+    "requestedBuffer": 512,
+    "initMs": 128,
+    "isRenderAheadEnabled": false,
+    "outputLatencyMs": 0.0,
+    "getEngineTimeType": "Duration (microsecond resolution, seconds on engine timeline)",
+    "idle": {
+      "engineAdvancedSec": 0.512,
+      "wallSec": 1.996,
+      "lastClockChangeAtWallSec": 0.497,
+      "changes": 47,
+      "backwardSteps": 0
+    },
+    "resumeJumpSec_engineFirstB_minus_lastA": 0.4693,
+    "running": {
+      "backwardSteps": 0,
+      "clockStepMs": {
+        "n": 750,
+        "mean": 10.6667,
+        "std": 0.0005,
+        "min": 10.666,
+        "p50": 10.667,
+        "p99": 10.667,
+        "max": 10.667
+      },
+      "wallMinusEngineMs_raw": {
+        "n": 1416,
+        "mean": 0.3037,
+        "std": 3.0855,
+        "min": -5.095,
+        "p50": 0.326,
+        "p99": 5.636,
+        "max": 5.827
+      },
+      "driftPpm_wallVsEngine": -43.37,
+      "wallMinusEngineMs_detrended": {
+        "n": 1416,
+        "mean": 0.0,
+        "std": 3.0839,
+        "min": -5.3029,
+        "p50": 0.0435,
+        "p99": 5.2575,
+        "max": 5.3514
+      }
+    },
+    "engineMinusPlayheadMs": {
+      "n": 200,
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "p50": 0.0,
+      "p99": 0.0,
+      "max": 0.0
+    }
+  },
+  "S1_clock_buf256": {
+    "requestedBuffer": 256,
+    "initMs": 44,
+    "isRenderAheadEnabled": false,
+    "outputLatencyMs": 0.0,
+    "getEngineTimeType": "Duration (microsecond resolution, seconds on engine timeline)",
+    "idle": {
+      "engineAdvancedSec": 0.5067,
+      "wallSec": 1.998,
+      "lastClockChangeAtWallSec": 0.501,
+      "changes": 88,
+      "backwardSteps": 0
+    },
+    "resumeJumpSec_engineFirstB_minus_lastA": 0.464,
+    "running": {
+      "backwardSteps": 0,
+      "clockStepMs": {
+        "n": 1402,
+        "mean": 5.7023,
+        "std": 1.3831,
+        "min": 5.333,
+        "p50": 5.333,
+        "p99": 10.667,
+        "max": 16.0
+      },
+      "wallMinusEngineMs_raw": {
+        "n": 1411,
+        "mean": 1.7855,
+        "std": 1.5645,
+        "min": -1.004,
+        "p50": 1.772,
+        "p99": 4.466,
+        "max": 4.643
+      },
+      "driftPpm_wallVsEngine": -33.75,
+      "wallMinusEngineMs_detrended": {
+        "n": 1411,
+        "mean": -0.0,
+        "std": 1.5625,
+        "min": -2.6768,
+        "p50": 0.0095,
+        "p99": 2.6552,
+        "max": 2.7426
+      }
+    },
+    "engineMinusPlayheadMs": {
+      "n": 200,
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "p50": 0.0,
+      "p99": 0.0,
+      "max": 0.0
+    }
+  },
+  "maxActiveVoiceCountDefault": 16,
+  "S2_120bpm": {
+    "bpm": 120.0,
+    "seconds": 60.0,
+    "beatsScheduled": 121,
+    "droppedLate": 0,
+    "rejectedByVoiceLimit": 0,
+    "minMarginMs": 200.0,
+    "cancelledAtStop": 1,
+    "neverEnded": 0,
+    "plannedIoiErrorMs(|at_k+1-at_k-60/bpm|)": {
+      "n": 119,
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "p50": 0.0,
+      "p99": 0.0,
+      "max": 0.0
+    },
+    "observedEndMinusExpectedEndMs(coarse, poll 2ms + buffer quantum)": {
+      "n": 120,
+      "mean": -4.0003,
+      "std": 1.4907,
+      "min": -6.001,
+      "p50": -3.334,
+      "p99": -2.0,
+      "max": -2.0
+    },
+    "observedIoiErrorMs(coarse)": {
+      "n": 119,
+      "mean": -0.0112,
+      "std": 2.3158,
+      "min": -4.0,
+      "p50": 1.333,
+      "p99": 1.334,
+      "max": 1.334
+    },
+    "tickGapMs": {
+      "n": 2399,
+      "mean": 25.0003,
+      "std": 0.6644,
+      "min": 14.296,
+      "p50": 24.838,
+      "p99": 26.001,
+      "max": 35.672
+    },
+    "activeVoicesAfter": 0
+  },
+  "S2_300bpm": {
+    "bpm": 300.0,
+    "seconds": 60.0,
+    "beatsScheduled": 301,
+    "droppedLate": 0,
+    "rejectedByVoiceLimit": 0,
+    "minMarginMs": 200.0,
+    "cancelledAtStop": 2,
+    "neverEnded": 0,
+    "plannedIoiErrorMs(|at_k+1-at_k-60/bpm|)": {
+      "n": 298,
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "p50": 0.0,
+      "p99": 0.0,
+      "max": 0.0
+    },
+    "observedEndMinusExpectedEndMs(coarse, poll 2ms + buffer quantum)": {
+      "n": 299,
+      "mean": -3.3384,
+      "std": 1.3332,
+      "min": -4.668,
+      "p50": -4.667,
+      "p99": -2.0,
+      "max": -2.0
+    },
+    "observedIoiErrorMs(coarse)": {
+      "n": 298,
+      "mean": -0.0,
+      "std": 2.6665,
+      "min": -2.667,
+      "p50": 2.666,
+      "p99": 2.667,
+      "max": 2.667
+    },
+    "tickGapMs": {
+      "n": 2399,
+      "mean": 25.0007,
+      "std": 0.7884,
+      "min": 8.466,
+      "p50": 25.047,
+      "p99": 26.003,
+      "max": 41.42
+    },
+    "activeVoicesAfter": 0
+  },
+  "S3_random_bpm_30s": {
+    "seconds": 30.0,
+    "bpmChanges": 21,
+    "changes": [
+      {
+        "engineSec": 122.064,
+        "bpm": 235.0,
+        "cancelled": 1
+      },
+      {
+        "engineSec": 123.861,
+        "bpm": 165.0,
+        "cancelled": 1
+      },
+      {
+        "engineSec": 125.349,
+        "bpm": 231.0,
+        "cancelled": 0
+      },
+      {
+        "engineSec": 126.8,
+        "bpm": 145.0,
+        "cancelled": 1
+      },
+      {
+        "engineSec": 127.877,
+        "bpm": 198.0,
+        "cancelled": 0
+      },
+      {
+        "engineSec": 129.595,
+        "bpm": 270.0,
+        "cancelled": 1
+      },
+      {
+        "engineSec": 130.603,
+        "bpm": 175.0,
+        "cancelled": 1
+      },
+      {
+        "engineSec": 131.771,
+        "bpm": 136.0,
+        "cancelled": 1
+      },
+      {
+        "engineSec": 133.488,
+        "bpm": 256.0,
+        "cancelled": 1
+      },
+      {
+        "engineSec": 135.291,
+        "bpm": 84.0,
+        "cancelled": 1
+      },
+      {
+        "engineSec": 137.003,
+        "bpm": 281.0,
+        "cancelled": 0
+      },
+      {
+        "engineSec": 138.971,
+        "bpm": 188.0,
+        "cancelled": 1
+      },
+      {
+        "engineSec": 140.549,
+        "bpm": 203.0,
+        "cancelled": 0
+      },
+      {
+        "engineSec": 142.171,
+        "bpm": 201.0,
+        "cancelled": 1
+      },
+      {
+        "engineSec": 143.579,
+        "bpm": 160.0,
+        "cancelled": 1
+      },
+      {
+        "engineSec": 144.832,
+        "bpm": 155.0,
+        "cancelled": 1
+      },
+      {
+        "engineSec": 146.187,
+        "bpm": 158.0,
+        "cancelled": 0
+      },
+      {
+        "engineSec": 147.781,
+        "bpm": 271.0,
+        "cancelled": 0
+      },
+      {
+        "engineSec": 149.136,
+        "bpm": 65.0,
+        "cancelled": 1
+      },
+      {
+        "engineSec": 149.643,
+        "bpm": 244.0,
+        "cancelled": 0
+      },
+      {
+        "engineSec": 150.816,
+        "bpm": 100.0,
+        "cancelled": 1
+      }
+    ],
+    "beatsScheduled": 110,
+    "beatsCancelled": 14,
+    "beatsKept": 96,
+    "keptEndedNaturally": 96,
+    "keptNeverEnded": 0,
+    "keptCutShort(ended >15ms before expected end)": 0,
+    "cutBeatIds": [],
+    "cancelledWithinGuardWindow": 0,
+    "cancelCalls": 14,
+    "handleStillValidRightAfterStop()": 0,
+    "stopCallMicros": {
+      "n": 14,
+      "mean": 29.2857,
+      "std": 8.3017,
+      "min": 15.0,
+      "p50": 28.0,
+      "p99": 42.0,
+      "max": 42.0
+    },
+    "keptGapMs": {
+      "n": 95,
+      "mean": 310.1502,
+      "std": 98.6637,
+      "min": 213.5231,
+      "p50": 295.5665,
+      "p99": 714.2857,
+      "max": 714.2857
+    },
+    "keptGapsBelow300bpmPeriod(duplicate suspects)": 0,
+    "keptGapsAbove60bpmPeriod(missing suspects)": 0,
+    "droppedLate": 0,
+    "minMarginMs": 30.0,
+    "activeVoicesAfter": 0
+  },
+  "S4_start_stop_x50": {
+    "cycles": 50,
+    "beatsScheduled": 77,
+    "cancelled": 34,
+    "endedNaturally": 43,
+    "unaccounted(neither cancelled nor ended)": 0,
+    "handlesStillValidAfter1s": 0,
+    "handleValidRightAfterStop()": 0,
+    "activeVoiceCountAfter": 0,
+    "voiceCountAfter": 0,
+    "droppedLate": 0,
+    "firstCycles": [
+      {
+        "scheduled": 1,
+        "cancelledAtStop": 0
+      },
+      {
+        "scheduled": 1,
+        "cancelledAtStop": 1
+      },
+      {
+        "scheduled": 1,
+        "cancelledAtStop": 1
+      },
+      {
+        "scheduled": 2,
+        "cancelledAtStop": 1
+      },
+      {
+        "scheduled": 1,
+        "cancelledAtStop": 0
+      }
+    ]
+  },
+  "S5a_64_future_default_maxvoices": {
+    "maxActiveVoiceCount": 16,
+    "sameInstant": false,
+    "requested": 64,
+    "rejected(zero handle)": 0,
+    "scheduleCallsTotalMs": 0.27,
+    "validHandlesRightAfterScheduling": 16,
+    "getActiveVoiceCountRightAfterScheduling": 16,
+    "playedFully": 16,
+    "killedBeforeOrDuringPlay": 48,
+    "killedBeatIdsFirst20": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+    "neverEnded": 0
+  },
+  "S5b_64_future_max128": {
+    "maxActiveVoiceCount": 128,
+    "sameInstant": false,
+    "requested": 64,
+    "rejected(zero handle)": 0,
+    "scheduleCallsTotalMs": 0.07,
+    "validHandlesRightAfterScheduling": 64,
+    "getActiveVoiceCountRightAfterScheduling": 64,
+    "playedFully": 64,
+    "killedBeforeOrDuringPlay": 0,
+    "killedBeatIdsFirst20": [],
+    "neverEnded": 0
+  },
+  "S5c_64_same_instant_max128": {
+    "maxActiveVoiceCount": 128,
+    "sameInstant": true,
+    "requested": 64,
+    "rejected(zero handle)": 0,
+    "scheduleCallsTotalMs": 0.11,
+    "validHandlesRightAfterScheduling": 64,
+    "getActiveVoiceCountRightAfterScheduling": 64,
+    "playedFully": 64,
+    "killedBeforeOrDuringPlay": 0,
+    "killedBeatIdsFirst20": [],
+    "neverEnded": 0
+  },
+  "finished": true
+}
