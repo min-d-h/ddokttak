@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 
 import '../app.dart';
 import '../state/mock_metronome_controller.dart';
+import 'onboarding.dart';
 import 'widgets/beat_cells.dart';
 import 'widgets/bpm_gestures.dart';
-import 'widgets/name_dialog.dart';
 import 'widgets/playlist_card.dart';
 import 'widgets/sound_picker.dart';
 import 'widgets/time_signature_picker.dart';
@@ -25,9 +25,22 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
 
   MockMetronomeController get c => widget.controller;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || c.onboarded) return;
+      await showOnboarding(context);
+      c.markOnboarded();
+    });
+  }
+
   /// iPhone 안전 영역 (다이내믹 아일랜드, 홈 막대, 가로일 때 양옆).
   /// 바탕색은 화면 끝까지 칠하고, 버튼과 글자만 이 안쪽에 둔다.
   EdgeInsets _pad = EdgeInsets.zero;
+
+  /// 마지막으로 본 방향. 바뀌면 가로 공연 자동 전환을 알린다.
+  bool? _lastLandscape;
 
   @override
   Widget build(BuildContext context) {
@@ -47,9 +60,16 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
             listenable: c,
             builder: (context, _) {
               _pad = MediaQuery.paddingOf(context);
-              final performance = c.mode == ViewMode.performance;
               final landscape =
                   MediaQuery.orientationOf(context) == Orientation.landscape;
+              if (landscape != _lastLandscape) {
+                _lastLandscape = landscape;
+                // 빌드 중에 상태를 바꾸지 않도록 다음 프레임에 처리한다.
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => c.onOrientationChanged(landscape: landscape),
+                );
+              }
+              final performance = c.mode == ViewMode.performance;
               // 고정 크기 대신 화면 높이에 비례해서 꽉 채운다.
               final content = LayoutBuilder(
                 builder: (context, box) => Column(
@@ -57,6 +77,8 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
                     _header(),
                     if (landscape)
                       Expanded(child: _landscapeBody(performance))
+                    else if (!performance && c.isPlaying)
+                      ..._focusBody()
                     else ...[
                       SizedBox(
                         height:
@@ -188,13 +210,41 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
   );
 
   /// 박 표시창: 주어진 높이를 꽉 채운다. 아래에 1픽셀 박 진행 막대.
-  Widget _display(bool performance) {
+  Widget _display(bool performance, {bool focus = false}) {
     final s = c.settings;
     return Container(
       color: AppColors.display,
       padding: EdgeInsets.fromLTRB(12 + _pad.left, 6, 12 + _pad.right, 0),
       child: Column(
         children: [
+          if (focus)
+            BpmDragArea(
+              onStep: _stepBpm,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Column(
+                  children: [
+                    Text(
+                      '${s.bpm.round()}',
+                      style: const TextStyle(
+                        fontSize: 120,
+                        fontWeight: FontWeight.w200,
+                        height: 1,
+                      ),
+                    ),
+                    Text(
+                      'BPM  ·  ${s.timeSignature.id}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        letterSpacing: 2,
+                        color: AppColors.subtext,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (focus) const SizedBox(height: 12),
           if (performance)
             Text(
               '${s.bpm.round()} BPM  ·  ${s.timeSignature.id}',
@@ -440,35 +490,41 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
   );
 
   /// 간편 저장: 이름 창 없이 지금 설정을 새 곡으로 저장하고 지금 폴더에 담는다.
+  /// 저장 버튼 하나: 고친 곡이면 [덮어쓰기 / 새 곡으로] 를 묻고, 아니면 바로 간편 저장.
   Widget _quickSaveButton(double height) => _squareButton(
     height: height,
-    onTap: () {
-      if (c.folder == null) return;
-      final id = c.quickSave();
-      final name = c.songById(id)!.name;
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text('"$name" 저장했어요'),
-            duration: const Duration(seconds: 3),
-            action: SnackBarAction(
-              label: '이름 바꾸기',
-              onPressed: () =>
-                  askName(context, '곡 이름', name, (n) => c.renameSong(id, n)),
-            ),
-          ),
-        );
-    },
+    onTap: () => saveCurrent(context, c),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.bolt, size: 20, color: AppColors.accent),
-        SizedBox(width: 4),
-        Text('지금 설정 저장', style: TextStyle(fontSize: 15)),
+        Icon(
+          c.isModified ? Icons.save : Icons.bolt,
+          size: 20,
+          color: AppColors.accent,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          c.isModified ? '변경 저장' : '지금 설정 저장',
+          style: const TextStyle(fontSize: 15),
+        ),
       ],
     ),
   );
+
+  /// 재생 중 집중 화면 (세로 연습): 박 표시창과 큰 BPM 이 화면 대부분, 아래는 정지 버튼 하나.
+  /// 정지 버튼은 재생 버튼이 있던 오른쪽 아래를 덮도록 전체 너비로 둔다.
+  List<Widget> _focusBody() => [
+    Expanded(child: _display(false, focus: true)),
+    Padding(
+      padding: EdgeInsets.fromLTRB(
+        6 + _pad.left,
+        6,
+        6 + _pad.right,
+        6 + _pad.bottom,
+      ),
+      child: _playButton(110),
+    ),
+  ];
 
   Widget _performanceBody() => Column(
     children: [
@@ -685,6 +741,28 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
                           onSelectionChanged: (s) => c.setSwingStyle(s.first),
                         ),
                       ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('가로로 돌리면 공연 모드'),
+                      subtitle: Text(
+                        '세로로 돌리면 원래 모드로 돌아와요',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.subtext,
+                        ),
+                      ),
+                      value: c.autoPerformanceOnLandscape,
+                      onChanged: c.setAutoPerformanceOnLandscape,
+                    ),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.help_outline),
+                      title: const Text('사용법 다시 보기'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        showOnboarding(this.context);
+                      },
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       '항상 화면 켜기, 다른 앱 소리와 섞기는 iPhone 버전에서 추가돼요.',

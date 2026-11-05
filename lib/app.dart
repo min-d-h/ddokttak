@@ -169,6 +169,11 @@ class DDokTTakApp extends StatelessWidget {
             thumbColor: AppColors.accent,
           ),
         ),
+        // 시스템 글자 크기는 1.3배까지만 따른다 (그 이상이면 버튼·목록이 깨진다).
+        builder: (context, child) => MediaQuery.withClampedTextScaling(
+          maxScaleFactor: 1.3,
+          child: child!,
+        ),
         home: MetronomeScreen(controller: controller),
       ),
     );

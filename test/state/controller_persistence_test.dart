@@ -21,11 +21,13 @@ void main() {
     return (c, repo);
   }
 
-  test('처음 열면 빈 보관함과 기본 폴더 하나', () async {
+  test('처음 열면 기본 폴더 하나와 기본 곡 60·120', () async {
     final dir = await Directory.systemTemp.createTemp('ddk');
     final (c, repo) = await open('${dir.path}/a.db');
-    expect(c.library, isEmpty);
+    expect(c.library.map((s) => s.name), ['60 · 4/4', '120 · 4/4']);
     expect(c.folders.single.name, '내 연주목록');
+    expect(c.folders.single.songIds, [for (final s in c.library) s.id]);
+    expect(c.onboarded, isFalse);
     await c.idle;
     await repo.close();
   });
@@ -34,6 +36,10 @@ void main() {
     final dir = await Directory.systemTemp.createTemp('ddk');
     final path = '${dir.path}/b.db';
     var (c, repo) = await open(path);
+    // 기본 곡은 지워도 다시 생기지 않는다.
+    for (final s in [...c.library]) {
+      c.deleteSongFromLibrary(s.id);
+    }
 
     c.setBpm(77);
     final a = c.createSongFromCurrent('곡 A');

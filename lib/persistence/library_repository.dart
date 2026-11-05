@@ -34,6 +34,8 @@ abstract final class AppStateKey {
   static const beatBar = 'beatBar';
   static const swingStyle = 'swingStyle';
   static const skin = 'skin';
+  static const autoPerformance = 'autoPerformance';
+  static const onboarded = 'onboarded';
 }
 
 /// 곡 보관함과 폴더를 저장하는 곳.

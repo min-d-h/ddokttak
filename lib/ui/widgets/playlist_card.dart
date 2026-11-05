@@ -167,19 +167,22 @@ class PlaylistCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                IconButton(
-                  iconSize: small ? 16 : 24,
-                  visualDensity: small ? VisualDensity.compact : null,
-                  tooltip: '지금 상태를 새 곡으로 저장하고 이 폴더에 담기',
-                  onPressed: c.folder == null
-                      ? null
-                      : () => saveNew(context, c),
-                  icon: const Icon(Icons.add),
+                // 저장은 아래 저장 버튼 하나로. 이 자리는 폴더 이름을 가운데에 두려고 같은 크기로 비운다.
+                Visibility(
+                  visible: false,
+                  maintainSize: true,
+                  maintainAnimation: true,
+                  maintainState: true,
+                  child: IconButton(
+                    iconSize: small ? 16 : 24,
+                    visualDensity: small ? VisualDensity.compact : null,
+                    onPressed: null,
+                    icon: const Icon(Icons.library_music_outlined),
+                  ),
                 ),
               ],
             ),
           ),
-          if (c.isModified) _ChangeBar(controller: c, small: small),
           Divider(height: 1, color: AppColors.outline),
           if (expand || fill)
             Expanded(child: list)
@@ -285,9 +288,76 @@ class PlaylistCard extends StatelessWidget {
   }
 }
 
-/// 지금 상태를 새 곡으로 저장하고 지금 폴더에 담는다. 이름은 미리 채워 둔다.
-void saveNew(BuildContext context, MockMetronomeController c) =>
-    askName(context, '새 곡으로 저장', c.suggestedNewName, c.saveAsNewSong);
+/// 저장 입구 하나.
+/// 불러온 곡을 고친 상태면 [덮어쓰기 / 새 곡으로] 를 묻고, 아니면 바로 간편 저장한다.
+Future<void> saveCurrent(
+  BuildContext context,
+  MockMetronomeController c,
+) async {
+  if (c.folder == null) return;
+  if (!c.isModified) {
+    _quickSave(context, c);
+    return;
+  }
+  final name = c.currentSong!.name;
+  final choice = await showDialog<String>(
+    context: context,
+    builder: (dialog) => AlertDialog(
+      backgroundColor: AppColors.card,
+      title: Text('"$name" 이(가) 바뀌었어요'),
+      content: Text(c.changeSummary),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialog),
+          child: const Text('취소'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(dialog, 'new'),
+          child: const Text('새 곡으로'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(dialog, 'update'),
+          child: const Text('덮어쓰기'),
+        ),
+      ],
+    ),
+  );
+  if (!context.mounted) return;
+  switch (choice) {
+    case 'update':
+      c.updateCurrentSong();
+      _snack(context, '"$name" 에 덮어썼어요');
+    case 'new':
+      _quickSave(context, c);
+  }
+}
+
+/// 이름 창 없이 "120 · 4/4" 로 새 곡 저장 + 지금 폴더에 담기. 알림에서 이름을 바꿀 수 있다.
+void _quickSave(BuildContext context, MockMetronomeController c) {
+  final id = c.quickSave();
+  final name = c.songById(id)!.name;
+  _snack(
+    context,
+    '"$name" 저장했어요',
+    action: SnackBarAction(
+      label: '이름 바꾸기',
+      onPressed: () =>
+          askName(context, '곡 이름', name, (n) => c.renameSong(id, n)),
+    ),
+  );
+}
+
+void _snack(BuildContext context, String text, {SnackBarAction? action}) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        content: Text(text),
+        duration: const Duration(seconds: 3),
+        action: action,
+      ),
+    );
+}
 
 /// 저장 안 한 변경이 있으면 물어본 뒤 다른 곡을 불러온다.
 Future<void> confirmLoad(
@@ -313,11 +383,11 @@ Future<void> confirmLoad(
         ),
         TextButton(
           onPressed: () => Navigator.pop(dialog, 'new'),
-          child: const Text('새로 저장'),
+          child: const Text('새 곡으로'),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(dialog, 'update'),
-          child: const Text('업데이트'),
+          child: const Text('덮어쓰기'),
         ),
       ],
     ),
@@ -328,62 +398,9 @@ Future<void> confirmLoad(
       c.updateCurrentSong();
       c.loadSong(id);
     case 'new':
-      askName(context, '새 곡으로 저장', c.suggestedNewName, (n) {
-        c.saveAsNewSong(n);
-        c.loadSong(id);
-      });
+      _quickSave(context, c);
+      c.loadSong(id);
     case 'discard':
       c.loadSong(id);
-  }
-}
-
-/// 불러온 곡이 바뀌었을 때만 보이는 알림 줄: 무엇이 바뀌었는지와 [업데이트] [새로 저장].
-class _ChangeBar extends StatelessWidget {
-  const _ChangeBar({required this.controller, this.small = false});
-  final MockMetronomeController controller;
-  final bool small;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = controller;
-    final buttonStyle = TextButton.styleFrom(
-      visualDensity: VisualDensity.compact,
-      textStyle: TextStyle(fontSize: small ? 10 : PlaylistCard.portraitText),
-      padding: small ? const EdgeInsets.symmetric(horizontal: 4) : null,
-      minimumSize: small ? Size.zero : null,
-    );
-    return Container(
-      color: AppColors.display,
-      padding: EdgeInsets.fromLTRB(
-        small ? 6 : 12,
-        small ? 2 : 4,
-        small ? 2 : 6,
-        small ? 2 : 4,
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.circle, size: 8, color: AppColors.accent),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              '${c.currentSong!.name} · ${c.changeSummary}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: small ? 9 : PlaylistCard.portraitText),
-            ),
-          ),
-          TextButton(
-            style: buttonStyle,
-            onPressed: c.updateCurrentSong,
-            child: const Text('업데이트'),
-          ),
-          TextButton(
-            style: buttonStyle,
-            onPressed: () => saveNew(context, c),
-            child: const Text('새로 저장'),
-          ),
-        ],
-      ),
-    );
   }
 }

@@ -20,6 +20,33 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   MockMetronomeController get c => widget.controller;
 
+  /// 보관함에서 지우는 건 되돌릴 수 없어서 한 번 묻는다 (폴더에서 빼기는 묻지 않는다).
+  Future<void> _confirmDelete(String id, String name) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        backgroundColor: AppColors.card,
+        title: Text('"$name" 을(를) 삭제할까요?'),
+        content: const Text('보관함과 모든 폴더에서 지워지고 되돌릴 수 없어요.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialog, false),
+            child: const Text('취소'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () => Navigator.pop(dialog, true),
+            child: const Text('삭제'),
+          ),
+        ],
+      ),
+    );
+    if (ok ?? false) {
+      setState(() => _picked.remove(id));
+      c.deleteSongFromLibrary(id);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -96,10 +123,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                             Icons.delete_outline,
                             '보관함에서 삭제 (모든 폴더에서 빠져요)',
                             true,
-                            () {
-                              _picked.remove(song.id);
-                              c.deleteSongFromLibrary(song.id);
-                            },
+                            () => _confirmDelete(song.id, song.name),
                           ),
                         ]),
                       ),

@@ -32,6 +32,7 @@ final class MockMetronomeController extends MetronomeController {
     if (repo == null) {
       library.addAll(_sampleSongs());
       folders.addAll(_sampleFolders);
+      onboarded = true; // 시험·목업 모드에서는 안내를 띄우지 않는다
     }
   }
 
@@ -399,6 +400,42 @@ final class MockMetronomeController extends MetronomeController {
     notifyListeners();
   }
 
+  /// 가로로 돌리면 공연 모드로 들어가고, 세로로 돌리면 원래 모드로 돌아온다 (설정에서 끌 수 있다).
+  bool autoPerformanceOnLandscape = true;
+  ViewMode? _modeBeforeLandscape;
+
+  void setAutoPerformanceOnLandscape(bool on) {
+    autoPerformanceOnLandscape = on;
+    _scheduleFlush();
+    notifyListeners();
+  }
+
+  void onOrientationChanged({required bool landscape}) {
+    if (!autoPerformanceOnLandscape) return;
+    if (landscape) {
+      if (_modeBeforeLandscape != null) return;
+      _modeBeforeLandscape = mode;
+      if (mode != ViewMode.performance) setMode(ViewMode.performance);
+    } else {
+      final back = _modeBeforeLandscape;
+      _modeBeforeLandscape = null;
+      if (back != null && back != mode) setMode(back);
+    }
+  }
+
+  /// 처음 사용 안내를 봤는지.
+  bool onboarded = false;
+
+  void markOnboarded() {
+    onboarded = true;
+    _scheduleFlush();
+    notifyListeners();
+  }
+
+  /// 보관함에서 지울 수 있는지 등 화면이 저장 버튼 문구를 정할 때 쓴다.
+  /// 저장 입구 하나: 불러온 곡을 고친 상태면 [덮어쓰기/새 곡], 아니면 간편 저장.
+  bool get saveNeedsChoice => isModified;
+
   void setVolume(double v) {
     volume = v;
     _player.setVolume(v);
@@ -621,6 +658,7 @@ final class MockMetronomeController extends MetronomeController {
     final m = mode.name, v = '$volume';
     final fl = '$flashEnabled', bb = '$beatBarEnabled', sw = swingStyle.name;
     final sk = skinId.value;
+    final ap = '$autoPerformanceOnLandscape', ob = '$onboarded';
     _persist((r) async {
       await r.setValue(AppStateKey.persistedState, stateJson);
       await r.setValue(AppStateKey.mode, m);
@@ -629,6 +667,8 @@ final class MockMetronomeController extends MetronomeController {
       await r.setValue(AppStateKey.beatBar, bb);
       await r.setValue(AppStateKey.swingStyle, sw);
       await r.setValue(AppStateKey.skin, sk);
+      await r.setValue(AppStateKey.autoPerformance, ap);
+      await r.setValue(AppStateKey.onboarded, ob);
       if (song != null) await r.saveSong(song);
     });
   }
@@ -650,6 +690,22 @@ final class MockMetronomeController extends MetronomeController {
     if (folders.isEmpty) {
       folders.add(Folder(id: _newId('f'), name: '내 연주목록'));
       _saveFolder(0);
+      // 첫 실행: 빈 화면 대신 바로 눌러 볼 수 있는 기본 곡 두 개 (지워도 다시 생기지 않는다).
+      if (library.isEmpty) {
+        for (final bpm in [60.0, 120.0]) {
+          final song = Song(
+            id: _newId('s'),
+            name: '${bpm.round()} · 4/4',
+            settings: MetronomeSettings.defaults().withBpm(bpm),
+          );
+          library.add(song);
+          _persist((r) => r.saveSong(song));
+        }
+        folders[0] = folders[0].copyWith(
+          songIds: [for (final s in library) s.id],
+        );
+        _saveFolder(0);
+      }
     }
     final v = d.values;
     final state = PersistedState.fromJson(
@@ -675,6 +731,8 @@ final class MockMetronomeController extends MetronomeController {
     flashEnabled = v[AppStateKey.flash] != 'false';
     beatBarEnabled = v[AppStateKey.beatBar] != 'false';
     AppColors.skin = Skins.byId(v[AppStateKey.skin]);
+    autoPerformanceOnLandscape = v[AppStateKey.autoPerformance] != 'false';
+    onboarded = v[AppStateKey.onboarded] == 'true';
     skinId.value = AppColors.skin.id;
     swingStyle =
         SwingStyle.values.asNameMap()[v[AppStateKey.swingStyle]] ??
