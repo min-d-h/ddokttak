@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../app.dart';
 import '../state/mock_metronome_controller.dart';
@@ -768,6 +769,18 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
+                    // 후원 안내: 설정 맨 아래 한 줄 (팝업·기능 잠금 없음).
+                    Center(
+                      child: TextButton(
+                        key: const Key('sponsor'),
+                        onPressed: () => launchUrl(
+                          Uri.parse(AppInfo.sponsorUrl),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                        child: const Text('똑딱이 연습에 도움이 되셨나요? 개발자에게 커피 한 잔 ☕'),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
                     Center(
                       child: Text(
                         '똑딱 ${AppInfo.version} · ${AppInfo.author}\n${AppInfo.repo} · ${AppInfo.license}',

@@ -9,6 +9,7 @@ abstract final class AppInfo {
   static const author = 'donghyeon Min';
   static const repo = 'github.com/min-d-h/ddokttak';
   static const license = 'GPL-3.0';
+  static const sponsorUrl = 'https://github.com/sponsors/min-d-h';
 }
 
 /// 스킨 = 색 묶음. ⚙ 설정에서 고르면 앱 전체가 바로 바뀐다.
