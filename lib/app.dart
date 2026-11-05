@@ -3,6 +3,14 @@ import 'package:flutter/material.dart';
 import 'state/mock_metronome_controller.dart';
 import 'ui/metronome_screen.dart';
 
+/// 앱 정보 (⚙ 설정 맨 아래에 보인다). pubspec.yaml 의 version 과 맞춘다.
+abstract final class AppInfo {
+  static const version = '1.0.1';
+  static const author = 'donghyeon Min';
+  static const repo = 'github.com/min-d-h/ddokttak';
+  static const license = 'GPL-3.0';
+}
+
 /// 스킨 = 색 묶음. ⚙ 설정에서 고르면 앱 전체가 바로 바뀐다.
 final class Skin {
   const Skin({

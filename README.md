@@ -13,6 +13,7 @@
   <img alt="Flutter" src="https://img.shields.io/badge/Flutter-02569B?style=flat-square&logo=flutter&logoColor=white">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-000000?style=flat-square&logo=apple&logoColor=white">
   <img alt="tests" src="https://img.shields.io/badge/tests-356%20passing-2EA44F?style=flat-square">
+  <img alt="license" src="https://img.shields.io/badge/license-GPL--3.0-8D98A5?style=flat-square">
 </p>
 
 ---
@@ -38,6 +39,7 @@ Frozen Ape 의 메트로놈 앱 *Tempo* 를 오래 써 오면서 "이런 게 있
 - [이런 걸 고민했습니다](#이런-걸-고민했습니다)
 - [어떻게 만들었나](#어떻게-만들었나)
 - [구조](#구조) · [실행](#실행) · [버전](#버전) · [다음에 할 것](#다음에-할-것)
+- [만든 사람과 라이선스](#만든-사람과-라이선스)
 
 ---
 
@@ -167,6 +169,21 @@ xcrun devicectl device install app --device <UDID> build/ios/iphoneos/Runner.app
 3. iPad 버전 (넓은 화면 2단 배치)
 4. Android (화면 꺼짐 재생용 포그라운드 서비스)
 5. 정식 출시 준비 (유료화, 스토어 자료, 접근성)
+
+---
+
+## 만든 사람과 라이선스
+
+**donghyeon Min** · [@min-d-h](https://github.com/min-d-h)
+
+직접 쓰려고 만들었고, 같은 고민을 하는 연주자들과 나누고 싶어 공개했습니다.
+
+- 라이선스: **GPL-3.0** ([LICENSE](LICENSE))
+  누구나 보고, 쓰고, 고칠 수 있습니다. 고친 앱을 배포할 때는 그 코드도 같은 라이선스로 공개해야 합니다.
+- 이름 "똑딱", 앱 아이콘, 화면 디자인은 만든 사람의 것입니다. 이 코드로 다른 앱을 배포할 때는 다른 이름과 아이콘을 써 주세요.
+- 버그 제보와 기능 제안은 Issues 로 받습니다. 코드 기여(Pull Request)를 보내 주시면, 그 기여를 이 프로젝트의 향후 버전(유료 정식판 포함)에 다른 라이선스로도 쓸 수 있도록 동의해 주신 것으로 봅니다.
+
+Copyright © 2026 donghyeon Min
 
 ---
 

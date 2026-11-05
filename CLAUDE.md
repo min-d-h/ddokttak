@@ -44,7 +44,7 @@ Frozen Ape 의 "Tempo" 앱을 닮은 개인용 메트로놈 앱. Flutter 로 만
 ## 환경
 - Flutter (Homebrew cask), CocoaPods, Xcode 27.2 설치 완료. flutter_soloud 5.x 는 Flutter 3.41 이상, Dart 3.11 이상이 필요하다.
 - 의존성: flutter_soloud ^5.2.2, audio_session ^0.2.4, shared_preferences ^2.5.6, collection
-- 번들 ID 접두사: `com.mindongh` (패키지 이름 `ddokttak`)
+- 번들 ID 접두사: `com.mindongh` — 앱 식별자 `com.mindongh.ddokttak` (2026-11-05 개인 식별자로 변경, 패키지 이름 `ddokttak`. 바뀌기 전 앱과 데이터는 이어지지 않음)
 - 권한 창 문제를 피하려고 `cd 폴더 && ...` 대신 절대 경로로 명령을 실행한다.
 
 ## 문서

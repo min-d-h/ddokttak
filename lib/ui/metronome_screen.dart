@@ -767,10 +767,17 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
                         showOnboarding(this.context);
                       },
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '항상 화면 켜기, 다른 앱 소리와 섞기는 iPhone 버전에서 추가돼요.',
-                      style: TextStyle(fontSize: 12, color: AppColors.subtext),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: Text(
+                        '똑딱 ${AppInfo.version} · ${AppInfo.author}\n${AppInfo.repo} · ${AppInfo.license}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.subtext,
+                          height: 1.5,
+                        ),
+                      ),
                     ),
                   ],
                 ),

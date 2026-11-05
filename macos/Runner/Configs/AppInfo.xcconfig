@@ -11,4 +11,4 @@ PRODUCT_NAME = ddokttak
 PRODUCT_BUNDLE_IDENTIFIER = com.mindongh.ddokttak
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 donghyeon Min.
+PRODUCT_COPYRIGHT = Copyright © 2026 donghyeon Min. Licensed under GPL-3.0.
