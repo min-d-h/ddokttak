@@ -157,9 +157,16 @@ final class SoloudMetronomeTransport implements MetronomeTransport {
         case ScheduleClick(:final event):
           engine.schedule(
             event.id,
-            SampleBank.idOf(event.sound, AccentMix.roleOf(event.accent)),
+            SampleBank.idOf(
+              event.sound,
+              AccentMix.roleOfEvent(event.accent, event.subIndex),
+            ),
             event.time,
-            gain: AccentMix.gainFor(event.accent, strength),
+            gain: AccentMix.gainForEvent(
+              event.accent,
+              event.subIndex,
+              strength,
+            ),
           );
         case CancelAfter(:final time):
           engine.cancelAfter(time);

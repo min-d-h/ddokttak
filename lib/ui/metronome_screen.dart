@@ -339,6 +339,8 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
                   TimeSignatureTile(
                     value: c.settings.timeSignature,
                     onChanged: c.setTimeSignature,
+                    subdivision: c.settings.subdivision,
+                    onSubdivision: c.setSubdivision,
                     height: 40,
                   ),
                   const SizedBox(height: 6),
@@ -473,6 +475,8 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
             child: TimeSignatureTile(
               value: c.settings.timeSignature,
               onChanged: c.setTimeSignature,
+              subdivision: c.settings.subdivision,
+              onSubdivision: c.setSubdivision,
             ),
           ),
           const SizedBox(width: 10),

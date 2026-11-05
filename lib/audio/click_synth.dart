@@ -30,6 +30,23 @@ abstract final class AccentMix {
     };
   }
 
+  /// 나눈 칸(subIndex > 0)의 작은 소리: 보통 박보다 이만큼 작게.
+  static const double subGainRatio = 0.55;
+
+  /// 이벤트 하나의 역할. 나눈 칸은 [ClickRole.sub] (같은 소리, 조금 낮게).
+  static ClickRole roleOfEvent(BeatAccent accent, int subIndex) =>
+      subIndex > 0 ? ClickRole.sub : roleOf(accent);
+
+  static double gainForEvent(
+    BeatAccent accent,
+    int subIndex,
+    double strength,
+  ) => subIndex > 0
+      ? (accent == BeatAccent.mute
+            ? 0
+            : gainFor(BeatAccent.normal, strength) * subGainRatio)
+      : gainFor(accent, strength);
+
   static double gainFor(BeatAccent accent, double strength) {
     final s = strength.clamp(0.0, 1.0);
     return switch (accent) {

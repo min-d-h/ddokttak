@@ -14,6 +14,7 @@ final class SampleBank {
     ClickRole.accent,
     ClickRole.weakAccent,
     ClickRole.normal,
+    ClickRole.sub,
   ];
 
   static int idOf(ClickSoundId sound, ClickRole role) =>

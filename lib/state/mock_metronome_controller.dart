@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../app.dart';
 import '../audio/preview_player.dart';
@@ -153,6 +154,8 @@ final class MockMetronomeController extends MetronomeController {
           !_sameAccents(before, now))
         '박 세기',
       if (before.sound != now.sound) '소리',
+      if (before.subdivision != now.subdivision)
+        '나누기 ${before.subdivision} → ${now.subdivision}',
       if (before.accentStrength != now.accentStrength) '강세 세기',
     ];
     return parts.isEmpty ? '설정 바뀜' : '${parts.join(', ')} 바뀜';
@@ -225,16 +228,21 @@ final class MockMetronomeController extends MetronomeController {
     if (e == null) {
       swing.value = null;
     } else {
+      // 박 진행 막대는 큰 박 기준: 나눈 칸에서는 박이 시작된 뒤 지난 시간으로 바꾼다.
       swing.value = swingAt(
-        sinceOnset: state.sinceOnset,
+        sinceOnset:
+            state.sinceOnset +
+            e.subIndex * _settings.secondsPerBeat / _settings.subdivision,
         secondsPerBeat: _settings.secondsPerBeat,
         beatIndex: e.tick ~/ ticksPerBeat,
         style: swingStyle,
       );
     }
+    // 깜빡임은 큰 박에만 (나눈 칸에서는 깜빡이지 않는다).
     if (flashEnabled &&
         e != null &&
         e.audible &&
+        e.subIndex == 0 &&
         state.sinceOnset < _flashSeconds) {
       flashAccent = e.accent == BeatAccent.accent;
       flash.value = 1 - state.sinceOnset / _flashSeconds;
@@ -304,6 +312,13 @@ final class MockMetronomeController extends MetronomeController {
     notifyListeners();
   }
 
+  /// 재생하는 동안 화면 자동 꺼짐(자동 잠금)을 막는다. 측면 버튼으로 직접 잠그면 계속 울린다.
+  void _keepScreenOn(bool on) {
+    (on ? WakelockPlus.enable() : WakelockPlus.disable()).catchError(
+      (Object e) => debugPrint('화면 켜짐 유지 실패: $e'),
+    );
+  }
+
   /// 재생 중이면 멈춘다 (전화 등 끼어들기).
   void stopIfPlaying() {
     if (isPlaying) togglePlay();
@@ -314,12 +329,14 @@ final class MockMetronomeController extends MetronomeController {
     final t = _t;
     if (t != null) {
       if (t.running.value) {
+        _keepScreenOn(false);
         unawaited(t.stop());
         _ticker?.stop();
         currentBeat.value = null;
         flash.value = 0;
         swing.value = null;
       } else {
+        _keepScreenOn(true);
         unawaited(t.start(_settings));
         (_ticker ??= Ticker(_onFrame)).start();
       }
@@ -383,6 +400,10 @@ final class MockMetronomeController extends MetronomeController {
       ),
     );
   }
+
+  /// 박 나누기 (1~4). 재생 중이면 다음 박부터 바뀐다.
+  void setSubdivision(int subdivision) =>
+      _set(_settings.withSubdivision(subdivision));
 
   @override
   void cycleAccent(int beat) {

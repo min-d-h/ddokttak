@@ -81,7 +81,13 @@ final class SchedulerCore {
     _lastEmitted = null;
     _settings = s;
     _tempo = TempoSegment(now + config.startLead, 0, s.secondsPerBeat);
-    _meter = MeterSegment(0, 0, s.timeSignature, s.accents);
+    _meter = MeterSegment(
+      0,
+      0,
+      s.timeSignature,
+      s.accents,
+      subdivision: s.subdivision,
+    );
     _nextTick = 0;
     _running = true;
     cmds.addAll(fill(now: now));
@@ -96,7 +102,7 @@ final class SchedulerCore {
     // 지나간 박은 소리 내지 않고 그리드만 유지한다.
     while (_tempo.timeAt(_nextTick) < now) {
       stats.droppedLate++;
-      _nextTick += ticksPerBeat;
+      _nextTick += _meter.step;
     }
 
     var audible = _pending.where((e) => e.audible && e.time > now).length;
@@ -112,7 +118,12 @@ final class SchedulerCore {
         bar: pos.bar,
         beatInBar: pos.beatInBar,
         subIndex: pos.subIndex,
-        accent: _meter.accentAt(pos.beatInBar),
+        // 나눈 칸의 작은 소리는 박이 무음이면 같이 무음, 아니면 보통 세기 (소리는 sub 역할로 따로 낸다).
+        accent: pos.subIndex == 0
+            ? _meter.accentAt(pos.beatInBar)
+            : (_meter.accentAt(pos.beatInBar) == BeatAccent.mute
+                  ? BeatAccent.mute
+                  : BeatAccent.normal),
         sound: _settings.sound,
       );
       _pending.add(e);
@@ -125,7 +136,7 @@ final class SchedulerCore {
         cmds.add(ScheduleClick(e));
         audible++;
       }
-      _nextTick += ticksPerBeat;
+      _nextTick += _meter.step;
     }
     return cmds;
   }
@@ -139,7 +150,12 @@ final class SchedulerCore {
     final meterChanged = s.timeSignature.beats != old.timeSignature.beats;
     final accentsChanged = !_sameAccents(s.accents, old.accents);
     final soundChanged = s.sound != old.sound;
-    if (!tempoChanged && !meterChanged && !accentsChanged && !soundChanged) {
+    final subdivisionChanged = s.subdivision != old.subdivision;
+    if (!tempoChanged &&
+        !meterChanged &&
+        !accentsChanged &&
+        !soundChanged &&
+        !subdivisionChanged) {
       // 강세 세기만 바뀐 경우. 박 그리드와 이벤트는 그대로다.
       _settings = s;
       return const [];
@@ -153,7 +169,15 @@ final class SchedulerCore {
       ..addAll(kept);
 
     final anchor = kept.isNotEmpty ? kept.last : _lastEmitted;
-    final next = canceled.isNotEmpty ? canceled.first.tick : _nextTick;
+    var next = canceled.isNotEmpty ? canceled.first.tick : _nextTick;
+    // 나누기가 바뀌면 다음 박(칸 경계 중 박 시작)부터 새 나누기로 이어 간다.
+    if (subdivisionChanged && !meterChanged) {
+      final beatStart =
+          _meter.startTick +
+          ((next - _meter.startTick + ticksPerBeat - 1) ~/ ticksPerBeat) *
+              ticksPerBeat;
+      next = beatStart;
+    }
 
     if (tempoChanged) {
       final double t;
@@ -173,9 +197,11 @@ final class SchedulerCore {
         (anchor?.bar ?? -1) + 1,
         s.timeSignature,
         s.accents,
+        subdivision: s.subdivision,
       );
-    } else if (accentsChanged) {
-      _meter = _meter.withAccents(s.accents);
+    } else {
+      if (accentsChanged) _meter = _meter.withAccents(s.accents);
+      if (subdivisionChanged) _meter = _meter.withSubdivision(s.subdivision);
     }
     _nextTick = next;
     _settings = s;

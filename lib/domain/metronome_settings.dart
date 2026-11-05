@@ -18,7 +18,9 @@ final class MetronomeSettings {
     required List<BeatAccent> accents,
     required this.sound,
     double accentStrength = defaultAccentStrength,
+    int subdivision = 1,
   }) : bpm = clampBpm(bpm),
+       subdivision = subdivision.clamp(minSubdivision, maxSubdivision),
        accentStrength = clampAccentStrength(accentStrength),
        accents = List.unmodifiable(_fitAccents(accents, timeSignature));
 
@@ -41,6 +43,12 @@ final class MetronomeSettings {
   /// 약한 강세는 이 값의 절반만큼 키운다. 오디오 엔진이 gain 과 음높이로 바꾼다.
   final double accentStrength;
 
+  /// 박 나누기: 박 하나를 몇 개로 나눠 사이에 작은 소리를 넣을지 (1 = 나누지 않음).
+  /// 2 = 띡 똑, 3 = 띡 똑 딱, 4 = 16분음표. 박자표 아래 숫자와는 별개다.
+  final int subdivision;
+  static const int minSubdivision = 1;
+  static const int maxSubdivision = 4;
+
   double get secondsPerBeat => 60.0 / bpm;
 
   static double clampBpm(double bpm) =>
@@ -55,13 +63,18 @@ final class MetronomeSettings {
     List<BeatAccent>? accents,
     ClickSoundId? sound,
     double? accentStrength,
+    int? subdivision,
   }) => MetronomeSettings(
     bpm: bpm ?? this.bpm,
     timeSignature: timeSignature ?? this.timeSignature,
     accents: accents ?? this.accents,
     sound: sound ?? this.sound,
     accentStrength: accentStrength ?? this.accentStrength,
+    subdivision: subdivision ?? this.subdivision,
   );
+
+  MetronomeSettings withSubdivision(int subdivision) =>
+      _copy(subdivision: subdivision);
 
   MetronomeSettings withBpm(double bpm) => _copy(bpm: bpm);
 
@@ -100,6 +113,7 @@ final class MetronomeSettings {
     'accents': [for (final a in accents) a.name],
     'sound': sound.name,
     'accentStrength': accentStrength,
+    'subdivision': subdivision,
   };
 
   /// 깨진 값은 기본값으로 대체한다. 예외를 던지지 않는다.
@@ -115,6 +129,7 @@ final class MetronomeSettings {
         : ts.defaultAccents();
     final bpm = json['bpm'];
     final strength = json['accentStrength'];
+    final sub = json['subdivision'];
     return MetronomeSettings(
       bpm: bpm is num ? bpm.toDouble() : d.bpm,
       timeSignature: ts,
@@ -123,6 +138,7 @@ final class MetronomeSettings {
       accentStrength: strength is num
           ? strength.toDouble()
           : defaultAccentStrength,
+      subdivision: sub is int ? sub : 1,
     );
   }
 
@@ -138,6 +154,7 @@ final class MetronomeSettings {
       other.timeSignature == timeSignature &&
       other.sound == sound &&
       other.accentStrength == accentStrength &&
+      other.subdivision == subdivision &&
       _listEquality.equals(other.accents, accents);
 
   @override
@@ -146,10 +163,11 @@ final class MetronomeSettings {
     timeSignature,
     sound,
     accentStrength,
+    subdivision,
     _listEquality.hash(accents),
   );
 
   @override
   String toString() =>
-      'MetronomeSettings(${bpm}bpm, $timeSignature, ${accents.map((a) => a.name).join(',')}, ${sound.name}, accent $accentStrength)';
+      'MetronomeSettings(${bpm}bpm, $timeSignature, ${accents.map((a) => a.name).join(',')}, ${sound.name}, accent $accentStrength, ÷$subdivision)';
 }
