@@ -144,3 +144,7 @@ Frozen Ape 의 "Tempo" 앱을 닮은 개인용 메트로놈 앱. Flutter 로 만
 - [x] 세로 공연 화면 개편 (폰 설치·사용자 확인 완료, git 커밋 전): 박 표시창 32% → 연주목록 4줄(스크롤·≡ 순서 바꾸기, `PlaylistCard(rows: 4)`) → [⏮][⏭] 높이 64 → 맨 아래 큰 재생 버튼(남은 높이, 48~160). 재생 전후 화면 고정(▶↔■ 만). 테스트 `test/ui/performance_portrait_test.dart`, 전체 356개 통과.
 - [ ] 다음: 가로는 무조건 공연 (사용자 확정 A안) — 가로 연습 화면(`_landscapePractice`)과 ⚙ "가로로 돌리면 공연 모드" 스위치(`autoPerformanceOnLandscape`) 없애기. 세로로 돌리면 원래 모드로 복귀는 유지. 가로 공연 화면 오른쪽은 큰 재생 + ⏮⏭ 그대로.
 - 앞으로 할 일 순서 (2026-11-05 제안, 사용자 확인 전): ① 가로는 무조건 공연 → ② 블루투스 화면 맞춤(자동 지연 + 보정 슬라이더) → ③ **iPad 버전** (지금도 TARGETED_DEVICE_FAMILY "1,2" 라 설치는 되지만 iPhone 배치를 늘린 모양. 넓은 화면은 왼쪽 연주목록 + 오른쪽 메인 2단, iPad 는 방향이 아니라 화면 너비로 배치 결정, 화면 나누기로 좁아지면 iPhone 배치, 블루투스 페달과 함께 고려, 실기기 없으면 iPad 시뮬레이터) → ④ Android(포그라운드 서비스) → ⑤ 정식 출시 준비(유료화, 스토어 자료, 접근성 이름표).
+- 재생 시작 지연 줄이기 (2026-11-05, 폰 설치·커밋 전): 원인은 soloud 가 소리가 없으면 0.5초 뒤 출력 장치를 끄고(엔진 시계도 멈춤), ▶ 를 누르면 장치를 다시 켜는 0.1~0.3초 + 첫 박 여유 0.08초가 더해졌기 때문.
+  A. 앱이 화면에 보이는 동안 `setAudioDeviceIdleTimeout(null)` 로 장치 켜 두기, 백그라운드에서는 500ms (재생 중엔 예약된 소리가 장치를 깨워 둠) — `SoloudAudioEngine.keepDeviceAwake`, `MockMetronomeController.setBackground`
+  B. 첫 박 여유 0.08 → 0.03초 (`SoloudMetronomeTransport._startLead`)
+  C. 재생 버튼에 손가락이 닿는 순간 `startAudioDevice()` 로 미리 깨우기, 손을 떼면 재생 (`prewarm`, 깨우는 데 5ms 넘게 걸리면 디버그 로그)

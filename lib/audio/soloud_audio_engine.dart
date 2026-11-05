@@ -141,6 +141,22 @@ final class SoloudAudioEngine implements AudioEngine {
 
   void setVolume(double volume) => _so.setGlobalVolume(volume.clamp(0.0, 1.0));
 
+  /// 소리 장치를 쉬는 동안에도 켜 둘지.
+  /// soloud 는 기본으로 소리가 없으면 0.5초 뒤 장치를 끈다. 꺼진 장치를 다시 켜는 데
+  /// iPhone 에서 0.1~0.3초가 걸려 재생 버튼을 누른 뒤 첫 박이 늦었다.
+  /// 화면에 보이는 동안은 켜 두고(무음 출력), 백그라운드에서 멈춰 있으면 원래대로 끈다.
+  void keepDeviceAwake(bool awake) => _so.setAudioDeviceIdleTimeout(
+    awake ? null : const Duration(milliseconds: 500),
+  );
+
+  /// 장치가 꺼져 있으면 미리 켠다 (재생 버튼에 손가락이 닿는 순간).
+  /// 켜는 데 걸린 시간을 돌려준다 (이미 켜져 있으면 거의 0).
+  Future<Duration> prewarm() async {
+    final sw = Stopwatch()..start();
+    await _so.startAudioDevice();
+    return sw.elapsed;
+  }
+
   @override
   Stream<EngineEvent> get events => _events.stream;
 

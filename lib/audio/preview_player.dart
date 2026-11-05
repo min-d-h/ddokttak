@@ -19,6 +19,7 @@ final class PreviewPlayer {
 
   Future<void> init({double accentStrength = 0.6}) async {
     await engine.init();
+    engine.keepDeviceAwake(true); // 앱이 켜지면 화면에 보이는 상태
     _ready = true;
     await setAccentStrength(accentStrength);
   }

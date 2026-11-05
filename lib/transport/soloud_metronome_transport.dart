@@ -25,9 +25,14 @@ final class SoloudMetronomeTransport implements MetronomeTransport {
   final _running = ValueNotifier(false);
   final _notices = StreamController<TransportNotice>.broadcast();
 
+  /// 첫 박 여유. 장치가 켜져 있으면 버퍼 두 칸(약 11ms)보다 조금 넉넉하면 된다.
+  /// (예전 0.08초는 장치가 꺼졌다 켜지는 시간까지 더해져 시작이 늦게 느껴졌다)
+  static const _startLead = 0.03;
+
   static const _foreground = SchedulerConfig(
     lookahead: 0.25,
     commitGuard: 0.03,
+    startLead: _startLead,
     maxPendingAudible: 48,
   );
 
@@ -35,6 +40,7 @@ final class SoloudMetronomeTransport implements MetronomeTransport {
   static const _backgroundConfig = SchedulerConfig(
     lookahead: 1.5,
     commitGuard: 0.03,
+    startLead: _startLead,
     maxPendingAudible: 96,
   );
   static const _tickForeground = Duration(milliseconds: 25);

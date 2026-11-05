@@ -279,7 +279,22 @@ final class MockMetronomeController extends MetronomeController {
   }
 
   /// 앱이 백그라운드로 가면 더 멀리 미리 예약한다.
-  void setBackground(bool background) => _t?.setBackground(background);
+  void setBackground(bool background) {
+    _t?.setBackground(background);
+    // 화면에 보이는 동안은 장치를 켜 둬서 ▶ 를 누르면 바로 울리게 한다.
+    // 백그라운드에서는 재생 중일 때만 켜 둔다 (재생 중엔 예약된 소리가 장치를 깨워 둔다).
+    if (_player.isReady) _player.engine.keepDeviceAwake(!background);
+  }
+
+  /// 재생 버튼에 손가락이 닿는 순간 장치를 미리 깨운다 (손을 떼면 재생).
+  void prewarm() {
+    if (!_player.isReady || isPlaying) return;
+    _player.engine.prewarm().then((took) {
+      if (took > const Duration(milliseconds: 5)) {
+        debugPrint('소리 장치 깨우기: ${took.inMilliseconds}ms');
+      }
+    }, onError: (Object e) => debugPrint('소리 장치 깨우기 실패: $e'));
+  }
 
   void _set(MetronomeSettings next) {
     _settings = next;

@@ -574,15 +574,19 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
     },
   );
 
-  Widget _playButton(double height) => _squareButton(
-    child: Icon(
-      c.isPlaying ? Icons.stop : Icons.play_arrow,
-      size: (height * 0.6).clamp(24.0, 160.0),
-      color: c.isPlaying ? AppColors.accent : AppColors.text,
+  /// 손가락이 닿는 순간 소리 장치를 미리 깨우고, 손을 뗄 때 재생한다.
+  Widget _playButton(double height) => Listener(
+    onPointerDown: (_) => c.prewarm(),
+    child: _squareButton(
+      child: Icon(
+        c.isPlaying ? Icons.stop : Icons.play_arrow,
+        size: (height * 0.6).clamp(24.0, 160.0),
+        color: c.isPlaying ? AppColors.accent : AppColors.text,
+      ),
+      height: height,
+      highlight: c.isPlaying,
+      onTap: c.togglePlay,
     ),
-    height: height,
-    highlight: c.isPlaying,
-    onTap: c.togglePlay,
   );
 
   Widget _squareButton({
