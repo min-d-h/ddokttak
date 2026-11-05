@@ -83,7 +83,7 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
                       SizedBox(
                         height:
                             (box.maxHeight - _pad.vertical) *
-                            (performance ? 0.26 : 0.2),
+                            (performance ? 0.32 : 0.2),
                         child: _display(performance),
                       ),
                       Expanded(
@@ -526,11 +526,26 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
     ),
   ];
 
+  /// 세로 공연: 연주목록 4줄 → [⏮][⏭] → 맨 아래 큰 재생 버튼(남은 높이 전부).
+  /// 무대에서 헷갈리지 않게 재생 전후 화면은 같다 (▶ 가 ■ 로만 바뀐다).
   Widget _performanceBody() => Column(
     children: [
-      Expanded(child: PlaylistCard(controller: c, expand: true)),
+      PlaylistCard(controller: c, expand: true, rows: 4),
       const SizedBox(height: 6),
-      _songButtons(104),
+      Row(
+        children: [
+          Expanded(child: _neighborButton(-1, 64)),
+          const SizedBox(width: 10),
+          Expanded(child: _neighborButton(1, 64)),
+        ],
+      ),
+      const SizedBox(height: 6),
+      Expanded(
+        child: LayoutBuilder(
+          builder: (context, box) =>
+              _playButton(box.maxHeight.clamp(48.0, 160.0)),
+        ),
+      ),
       const SizedBox(height: 6),
     ],
   );
@@ -543,17 +558,6 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
       height: height,
       onTap: () {},
     ),
-  );
-
-  /// [⏮] [재생] [⏭].
-  Widget _songButtons(double height) => Row(
-    children: [
-      Expanded(child: _neighborButton(-1, height)),
-      const SizedBox(width: 10),
-      Expanded(flex: 2, child: _playButton(height)),
-      const SizedBox(width: 10),
-      Expanded(child: _neighborButton(1, height)),
-    ],
   );
 
   /// 이전(-1)/다음(+1) 곡. 저장 안 한 변경이 있으면 먼저 묻는다.

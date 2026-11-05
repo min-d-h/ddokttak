@@ -15,6 +15,7 @@ class PlaylistCard extends StatelessWidget {
     this.expand = false,
     this.fill = false,
     this.small = false,
+    this.rows,
   });
 
   final MockMetronomeController controller;
@@ -27,6 +28,12 @@ class PlaylistCard extends StatelessWidget {
 
   /// 가로 화면용: 머리·BPM 글자는 작게, 곡 제목만 조금 크게(13).
   final bool small;
+
+  /// 정해 주면 이 줄 수만큼만 보이고 넘치면 스크롤한다 (세로 공연은 4줄).
+  final int? rows;
+
+  /// 공연(큰 글자) 한 줄 높이.
+  static const double largeRowHeight = 44;
 
   /// 연습 모드에서 한 화면에 보이는 곡 수와 한 줄 높이. 넘치면 스크롤한다.
   static const int visibleRows = 6;
@@ -48,7 +55,7 @@ class PlaylistCard extends StatelessWidget {
           )
         : ReorderableListView.builder(
             buildDefaultDragHandles: false,
-            itemExtent: small ? 28 : (expand ? 44 : rowHeight),
+            itemExtent: small ? 28 : (expand ? largeRowHeight : rowHeight),
             itemCount: songs.length,
             onReorderItem: c.reorderInFolder,
             itemBuilder: (context, i) {
@@ -184,7 +191,12 @@ class PlaylistCard extends StatelessWidget {
             ),
           ),
           Divider(height: 1, color: AppColors.outline),
-          if (expand || fill)
+          if (rows != null)
+            SizedBox(
+              height: (expand ? largeRowHeight : rowHeight) * rows!,
+              child: list,
+            )
+          else if (expand || fill)
             Expanded(child: list)
           else
             SizedBox(height: rowHeight * visibleRows, child: list),
