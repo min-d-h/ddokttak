@@ -12,7 +12,7 @@
   <img alt="version" src="https://img.shields.io/badge/version-1.0.1-4DB3FF?style=flat-square">
   <img alt="Flutter" src="https://img.shields.io/badge/Flutter-02569B?style=flat-square&logo=flutter&logoColor=white">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-000000?style=flat-square&logo=apple&logoColor=white">
-  <img alt="tests" src="https://img.shields.io/badge/tests-356%20passing-2EA44F?style=flat-square">
+  <img alt="tests" src="https://img.shields.io/badge/tests-361%20passing-2EA44F?style=flat-square">
   <img alt="license" src="https://img.shields.io/badge/license-GPL--3.0-8D98A5?style=flat-square">
 </p>
 
@@ -27,13 +27,13 @@ Frozen Ape 의 메트로놈 앱 *Tempo* 를 오래 써 오면서 "이런 게 있
 | | |
 |---|---|
 | **정확한 박** | 오디오 엔진 시계에 미리 예약해서, 앱이 바빠도 박이 밀리지 않아요 · BPM 20~400 |
-| **자유로운 박자** | 박 수 1~16 × 음표 단위 1~16, 박마다 4단계 세기 |
+| **자유로운 박자** | 박 수 1~16 × 음표 단위 1~16, 박마다 4단계 세기, **박 나누기 1~4** (띡 똑 딱) |
 | **소리 7종** | 우드블록 · 전자 클릭 · 비프 · 기계식 틱 · 클라베스 · 카우벨 · 디지털 (모두 직접 합성) |
 | **연습과 공연** | 세로는 연습, 가로로 돌리면 공연 화면 · 재생하면 박과 BPM 이 크게 |
 | **곡 관리** | 곡 보관함 → 폴더(연주목록)에 담기 · 저장 버튼 하나 |
 | **보이는 박** | 박 칸, 화면 깜빡임, 왕복하는 박 진행 막대가 소리와 같은 순간에 |
 | **스킨 5종** | 블루 나이트 · 선셋 · 라벤더 · 모노 · 라이트 (글자 대비 4.5 이상) |
-| **화면 꺼져도** | 화면 잠금 · 무음 스위치 · 음악 앱과 함께 써도 계속 재생 |
+| **화면 꺼져도** | 화면 잠금 · 무음 스위치 · 음악 앱과 함께 써도 계속 재생 · 재생 중엔 자동 잠금 안 됨 |
 
 ## 목차
 - [이런 걸 고민했습니다](#이런-걸-고민했습니다)
@@ -119,7 +119,7 @@ AI 코딩 도구 **Claude Code** 와 대화하며 만들었습니다. 저는 무
 
 진행 방식으로 지킨 것들
 - 큰 변경은 **먼저 글로 확인하고, 수락하면 만든다.**
-- 고칠 때마다 **자동 테스트**를 같이 넣는다 (현재 356개).
+- 고칠 때마다 **자동 테스트**를 같이 넣는다 (현재 361개).
 - 단계마다 멈추고, 결정과 진행 상황은 `CLAUDE.md` 에 남긴다.
 
 ---
@@ -161,7 +161,7 @@ xcrun devicectl device install app --device <UDID> build/ios/iphoneos/Runner.app
 | 버전 | 내용 |
 |---|---|
 | **1.0.0** | 정확한 박자 엔진, 박자·세기, 소리 7종, 연습/공연, 곡 보관함·폴더, 스킨 5종, 화면 꺼짐 재생, 앱 아이콘 |
-| **1.0.1** | 재생 집중 화면, 저장 버튼 하나, 처음 사용 안내, 기본 곡(60·120), 가로 = 공연 |
+| **1.0.1** | 재생 집중 화면, 저장 버튼 하나, 처음 사용 안내, 기본 곡(60·120), 가로 = 공연, 재생 시작 지연 줄이기, 박 나누기(1~4), 재생 중 화면 꺼짐 막기 |
 
 ## 다음에 할 것
 1. 가로는 무조건 공연 화면으로 정리
