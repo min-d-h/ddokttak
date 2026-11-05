@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'state/mock_metronome_controller.dart';
+import 'ui/widgets/demo_touches.dart';
 import 'ui/metronome_screen.dart';
 
 /// 앱 정보 (⚙ 설정 맨 아래에 보인다). pubspec.yaml 의 version 과 맞춘다.
@@ -181,7 +182,8 @@ class DDokTTakApp extends StatelessWidget {
         // 시스템 글자 크기는 1.3배까지만 따른다 (그 이상이면 버튼·목록이 깨진다).
         builder: (context, child) => MediaQuery.withClampedTextScaling(
           maxScaleFactor: 1.3,
-          child: child!,
+          // 시연 영상 촬영 때만 터치 위치를 보여 준다.
+          child: demoTouches ? DemoTouches(child: child!) : child!,
         ),
         home: MetronomeScreen(controller: controller),
       ),

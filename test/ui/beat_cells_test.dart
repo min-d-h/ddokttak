@@ -34,4 +34,30 @@ void main() {
       });
     }
   }
+
+  // 가로 회전 중이나 작은 화면처럼 아주 낮은 높이에서도 넘치지 않는다 (번호는 숨김).
+  for (final h in [12.0, 19.0, 30.0, 60.0]) {
+    testWidgets('높이 $h 에서도 박 칸이 넘치지 않는다', (tester) async {
+      tester.view.physicalSize = const Size(900, 400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final ts = TimeSignature(16, 4);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: SizedBox(
+              width: 800,
+              height: h,
+              child: BeatCells(
+                accents: ts.defaultAccents(),
+                current: 0,
+                onTap: (_) {},
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
 }

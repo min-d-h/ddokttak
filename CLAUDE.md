@@ -153,3 +153,4 @@ Frozen Ape 의 "Tempo" 앱을 닮은 개인용 메트로놈 앱. Flutter 로 만
   배치 — 위 박 표시창 : 아래 = 2:3, 아래 [작은 연주목록] [BPM 조절판(작게) / [박자표 바 + TAP] [⚡ 지금 설정 저장 / 재생]].
   코드는 git 커밋 4db28b5 의 `lib/ui/metronome_screen.dart` `_landscapePractice()` 와 ⚙ "가로로 돌리면 공연 모드" 스위치(`autoPerformanceOnLandscape`). 되살리려면 그 커밋에서 가져온다.
   지금: 가로는 연습 모드여도 공연 화면, 가로에서는 상단바 모드 전환을 숨김, 세로로 돌리면 원래 모드로 복귀.
+- 후원 채널 (2026-11-05 조사): GitHub Sponsors 사용 중. 토스아이디(toss.me)는 종료됨(토스 공식 안내 확인, 날짜는 미확인 — 적을 때 날짜 없이). 대체 후보는 미확인 — 카카오페이 송금코드(앱에서 링크 발급 가능한지 사용자 확인 필요, 카카오 프로필 노출), Ko-fi(+PayPal 로 한국 정산 가능한지 확인 필요), Buy Me a Coffee(수수료 5%+, 한국 정산 미확인). 정해지면 FUNDING.yml custom, README 후원 섹션, 앱 ⚙ 링크에 함께 넣는다.

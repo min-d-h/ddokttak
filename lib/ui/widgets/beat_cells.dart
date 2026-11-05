@@ -78,58 +78,66 @@ class BeatCells extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         // 막대 높이는 남은 공간에 대한 비율이라 칸 수가 바뀌어도 넘치지 않는다.
-        child: Column(
-          children: [
-            Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: AnimatedFractionallySizedBox(
-                  duration: const Duration(milliseconds: 120),
-                  heightFactor: level == 0 ? 0.18 : level,
-                  widthFactor: 1,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: level == 0
-                          ? Colors.transparent
-                          : lit
-                          ? scheme.primary
-                          : color.withValues(alpha: 0.35),
-                      border: Border.all(
-                        color: lit
+        // 공간이 아주 좁으면(가로 회전 중, 작은 화면) 아래 번호를 숨겨 넘치지 않게 한다.
+        child: LayoutBuilder(
+          builder: (context, box) => Column(
+            children: [
+              Expanded(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: AnimatedFractionallySizedBox(
+                    duration: const Duration(milliseconds: 120),
+                    heightFactor: level == 0 ? 0.18 : level,
+                    widthFactor: 1,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: level == 0
+                            ? Colors.transparent
+                            : lit
                             ? scheme.primary
-                            : color.withValues(alpha: 0.7),
-                        width: 2,
+                            : color.withValues(alpha: 0.35),
+                        border: Border.all(
+                          color: lit
+                              ? scheme.primary
+                              : color.withValues(alpha: 0.7),
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: lit
+                            ? [
+                                BoxShadow(
+                                  color: scheme.primary,
+                                  blurRadius: 22,
+                                  spreadRadius: 2,
+                                ),
+                              ]
+                            : null,
                       ),
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: lit
-                          ? [
-                              BoxShadow(
-                                color: scheme.primary,
-                                blurRadius: 22,
-                                spreadRadius: 2,
-                              ),
-                            ]
-                          : null,
                     ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${i + 1}',
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.4,
-                color: lit ? scheme.primary : scheme.onSurfaceVariant,
-                fontWeight: lit ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-          ],
+              if (box.maxHeight >= _minHeightWithLabel) ...[
+                const SizedBox(height: 4),
+                Text(
+                  '${i + 1}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.4,
+                    color: lit ? scheme.primary : scheme.onSurfaceVariant,
+                    fontWeight: lit ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
   }
+
+  /// 번호(글자 + 간격)를 보여 줄 수 있는 최소 칸 높이. 이보다 좁으면 막대만.
+  static const double _minHeightWithLabel = 44;
 }
 
 /// 박 표시창 아래 1픽셀 막대. 짧은 표시가 박마다 양 끝을 오가는 왕복 운동을 한다.

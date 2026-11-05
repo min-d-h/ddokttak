@@ -50,12 +50,19 @@ class TimeSignatureTile extends StatelessWidget {
                   style: TextStyle(fontSize: 11, color: AppColors.subtext),
                 ),
               ),
-              Text(
-                subdivision > 1 ? '${value.id} ÷$subdivision' : value.id,
-                key: valueKey,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w300,
+              // "박자" 와 겹치지 않게 좌우 같은 여백 안에 두고, 길면 글자를 줄인다 (가운데는 그대로).
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 36),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    subdivision > 1 ? '${value.id} ÷$subdivision' : value.id,
+                    key: valueKey,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
                 ),
               ),
             ],
