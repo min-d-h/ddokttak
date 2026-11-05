@@ -76,7 +76,9 @@ Frozen Ape 의 "Tempo" 앱을 닮은 개인용 메트로놈 앱. Flutter 로 만
   - 시스템 글자 크기는 최대 1.3배까지만 반영
   - 가로로 돌리면 공연 모드, 세로로 돌리면 원래 모드로 복귀 (⚙ "가로로 돌리면 공연 모드" 로 끌 수 있음)
   - (2026-11-05 추가, 버전 그대로 1.0.1) 재생 시작 지연 줄이기, 세로 공연 화면 개편, **박 나누기 1~4**(박자표 휠 세 번째, 나눈 칸은 같은 소리 0.55배·조금 낮게, 무음 박이면 같이 무음, 재생 중 바꾸면 다음 박부터, 깜빡임은 큰 박에만), **재생 중 화면 꺼짐 막기**(wakelock_plus)
-  - 테스트 362개
+  - (2026-11-05) 시연 영상 GIF 5개 README 미리 보기 (`docs/demo/`), 자동 촬영 도구 `integration_test/demo_video_test.dart` + `--dart-define=DEMO_TOUCHES=true`(촬영 때만 터치 표시). 다시 찍기: 시뮬레이터 부팅 → `xcrun simctl io <SIM> recordVideo` 를 켠 채 `flutter test integration_test/demo_video_test.dart -d <SIM> --dart-define=DEMO_TOUCHES=true` → 로그의 "CLIP n 시각" 으로 ffmpeg 자르기 (5번은 transpose=1 로 세우기)
+  - 촬영 중 고친 버그: 박자표 바 "4/4 ÷2" 와 "박자" 글자 겹침, 박 칸이 아주 낮을 때 번호 넘침(좁으면 번호 숨김)
+  - 테스트 366개
 
 ## 진행 상황 (설계 문서 4장 기준)
 0단계: 계약 파일 고정

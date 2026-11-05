@@ -12,7 +12,7 @@
   <img alt="version" src="https://img.shields.io/badge/version-1.0.1-4DB3FF?style=flat-square">
   <img alt="Flutter" src="https://img.shields.io/badge/Flutter-02569B?style=flat-square&logo=flutter&logoColor=white">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-000000?style=flat-square&logo=apple&logoColor=white">
-  <img alt="tests" src="https://img.shields.io/badge/tests-362%20passing-2EA44F?style=flat-square">
+  <img alt="tests" src="https://img.shields.io/badge/tests-366%20passing-2EA44F?style=flat-square">
   <img alt="license" src="https://img.shields.io/badge/license-GPL--3.0-8D98A5?style=flat-square">
 </p>
 
@@ -35,8 +35,35 @@ Frozen Ape 의 메트로놈 앱 *Tempo* 를 오래 써 오면서 "이런 게 있
 | **스킨 5종** | 블루 나이트 · 선셋 · 라벤더 · 모노 · 라이트 (글자 대비 4.5 이상) |
 | **화면 꺼져도** | 화면 잠금 · 무음 스위치 · 음악 앱과 함께 써도 계속 재생 · 재생 중엔 자동 잠금 안 됨 |
 
+## 🎬 미리 보기
+
+<table>
+  <tr>
+    <td align="center" width="25%"><img src="docs/demo/1-beat-display.gif" width="180" alt="박 표시"></td>
+    <td align="center" width="25%"><img src="docs/demo/2-accent-subdivision.gif" width="180" alt="박 세기와 박 나누기"></td>
+    <td align="center" width="25%"><img src="docs/demo/3-bpm-controls.gif" width="180" alt="BPM 조절"></td>
+    <td align="center" width="25%"><img src="docs/demo/4-save-playlist.gif" width="180" alt="저장과 연주목록"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>① 소리에 맞춘 박 표시</b><br>▶ 를 누르면 박 칸이 소리와 같은 순간에 빛나요. 화면 깜빡임과 아래 박 진행 막대도 박에 맞춰 움직여요.</td>
+    <td valign="top"><b>② 박 세기 · 박 나누기</b><br>박 칸을 누를 때마다 강세 → 약한 강세 → 보통 → 무음. 박자 휠에서 박 나누기 3을 고르면 "띡 똑 딱".</td>
+    <td valign="top"><b>③ BPM 조절</b><br>큰 숫자를 좌우로 밀거나, − / + 를 꾹 누르면 점점 빠르게 바뀌어요. TAP 을 두드려 맞출 수도 있어요.</td>
+    <td valign="top"><b>④ 저장 버튼 하나 · 연주목록</b><br>고친 곡은 [새 곡으로 / 덮어쓰기] 중에 골라 저장. 곡을 누르면 바로 바뀌고, 왼쪽으로 밀면 폴더에서 빠져요.</td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/demo/5-performance-landscape.gif" width="560" alt="가로 공연 화면과 스킨">
+</p>
+<p align="center">
+  <b>⑤ 가로 = 공연 화면 · 스킨</b><br>
+  폰을 가로로 돌리면 공연 화면. 큰 재생 버튼과 ⏮ ⏭ 로 연주목록을 넘기고, 스킨 5종으로 색을 바꿔요.
+</p>
+
+<sub>※ 시뮬레이터에서 자동으로 찍은 영상이라 소리는 없고, 흰 동그라미는 누른 위치 표시예요 (실제 앱에는 나오지 않아요). 5초에 맞추려고 조금 빠르게 재생했어요.</sub>
+
 ## 목차
-- [이런 걸 고민했습니다](#이런-걸-고민했습니다)
+- [미리 보기](#-미리-보기) · [이런 걸 고민했습니다](#이런-걸-고민했습니다)
 - [어떻게 만들었나](#어떻게-만들었나)
 - [구조](#구조) · [실행](#실행) · [버전](#버전) · [다음에 할 것](#다음에-할-것)
 - [후원하기](#-후원하기) · [만든 사람과 라이선스](#만든-사람과-라이선스)
@@ -119,7 +146,7 @@ AI 코딩 도구 **Claude Code** 와 대화하며 만들었습니다. 저는 무
 
 진행 방식으로 지킨 것들
 - 큰 변경은 **먼저 글로 확인하고, 수락하면 만든다.**
-- 고칠 때마다 **자동 테스트**를 같이 넣는다 (현재 362개).
+- 고칠 때마다 **자동 테스트**를 같이 넣는다 (현재 366개).
 - 단계마다 멈추고, 결정과 진행 상황은 `CLAUDE.md` 에 남긴다.
 
 ---
