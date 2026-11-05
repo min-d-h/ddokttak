@@ -1,11 +1,43 @@
-# 똑딱 (DDokTTak)
+<p align="center">
+  <img src="docs/images/icon.png" width="112" alt="똑딱 앱 아이콘">
+</p>
+
+<h1 align="center">똑딱 · DDokTTak</h1>
+
+<p align="center">
+  보면대 위에 올려 두고 쓰는, 박이 정확한 개인용 메트로놈
+</p>
+
+<p align="center">
+  <img alt="version" src="https://img.shields.io/badge/version-1.0.1-4DB3FF?style=flat-square">
+  <img alt="Flutter" src="https://img.shields.io/badge/Flutter-02569B?style=flat-square&logo=flutter&logoColor=white">
+  <img alt="iOS" src="https://img.shields.io/badge/iOS-000000?style=flat-square&logo=apple&logoColor=white">
+  <img alt="tests" src="https://img.shields.io/badge/tests-356%20passing-2EA44F?style=flat-square">
+</p>
+
+---
 
 폰을 보면대에 올려 두고 연습할 때 쓰려고 만든 **개인용 메트로놈 앱**입니다.
 Frozen Ape 의 메트로놈 앱 *Tempo* 를 오래 써 오면서 "이런 게 있었으면" 싶던 부분은 더하고, 쓰지 않던 기능은 덜어 내는 데서 출발했습니다.
 기능 구성만 참고했고, 이름·아이콘·소리·화면 디자인은 따라 하지 않고 새로 만들었습니다.
 
-- 플랫폼: Flutter (iPhone 에서 사용 중, Android·macOS·iPad 확장 고려)
-- 현재 버전: **1.0.1** (`v1.0.1`)
+## 한눈에 보기
+
+| | |
+|---|---|
+| **정확한 박** | 오디오 엔진 시계에 미리 예약해서, 앱이 바빠도 박이 밀리지 않아요 · BPM 20~400 |
+| **자유로운 박자** | 박 수 1~16 × 음표 단위 1~16, 박마다 4단계 세기 |
+| **소리 7종** | 우드블록 · 전자 클릭 · 비프 · 기계식 틱 · 클라베스 · 카우벨 · 디지털 (모두 직접 합성) |
+| **연습과 공연** | 세로는 연습, 가로로 돌리면 공연 화면 · 재생하면 박과 BPM 이 크게 |
+| **곡 관리** | 곡 보관함 → 폴더(연주목록)에 담기 · 저장 버튼 하나 |
+| **보이는 박** | 박 칸, 화면 깜빡임, 왕복하는 박 진행 막대가 소리와 같은 순간에 |
+| **스킨 5종** | 블루 나이트 · 선셋 · 라벤더 · 모노 · 라이트 (글자 대비 4.5 이상) |
+| **화면 꺼져도** | 화면 잠금 · 무음 스위치 · 음악 앱과 함께 써도 계속 재생 |
+
+## 목차
+- [이런 걸 고민했습니다](#이런-걸-고민했습니다)
+- [어떻게 만들었나](#어떻게-만들었나)
+- [구조](#구조) · [실행](#실행) · [버전](#버전) · [다음에 할 것](#다음에-할-것)
 
 ---
 
