@@ -436,18 +436,11 @@ final class MockMetronomeController extends MetronomeController {
     notifyListeners();
   }
 
-  /// 가로로 돌리면 공연 모드로 들어가고, 세로로 돌리면 원래 모드로 돌아온다 (설정에서 끌 수 있다).
-  bool autoPerformanceOnLandscape = true;
+  /// 가로로 돌리면 공연 모드로 들어가고, 세로로 돌리면 원래 모드로 돌아온다.
+  /// 가로 화면은 공연 화면만 있다 (가로 연습 화면은 보류).
   ViewMode? _modeBeforeLandscape;
 
-  void setAutoPerformanceOnLandscape(bool on) {
-    autoPerformanceOnLandscape = on;
-    _scheduleFlush();
-    notifyListeners();
-  }
-
   void onOrientationChanged({required bool landscape}) {
-    if (!autoPerformanceOnLandscape) return;
     if (landscape) {
       if (_modeBeforeLandscape != null) return;
       _modeBeforeLandscape = mode;
@@ -694,7 +687,7 @@ final class MockMetronomeController extends MetronomeController {
     final m = mode.name, v = '$volume';
     final fl = '$flashEnabled', bb = '$beatBarEnabled', sw = swingStyle.name;
     final sk = skinId.value;
-    final ap = '$autoPerformanceOnLandscape', ob = '$onboarded';
+    final ob = '$onboarded';
     _persist((r) async {
       await r.setValue(AppStateKey.persistedState, stateJson);
       await r.setValue(AppStateKey.mode, m);
@@ -703,7 +696,6 @@ final class MockMetronomeController extends MetronomeController {
       await r.setValue(AppStateKey.beatBar, bb);
       await r.setValue(AppStateKey.swingStyle, sw);
       await r.setValue(AppStateKey.skin, sk);
-      await r.setValue(AppStateKey.autoPerformance, ap);
       await r.setValue(AppStateKey.onboarded, ob);
       if (song != null) await r.saveSong(song);
     });
@@ -767,7 +759,6 @@ final class MockMetronomeController extends MetronomeController {
     flashEnabled = v[AppStateKey.flash] != 'false';
     beatBarEnabled = v[AppStateKey.beatBar] != 'false';
     AppColors.skin = Skins.byId(v[AppStateKey.skin]);
-    autoPerformanceOnLandscape = v[AppStateKey.autoPerformance] != 'false';
     onboarded = v[AppStateKey.onboarded] == 'true';
     skinId.value = AppColors.skin.id;
     swingStyle =

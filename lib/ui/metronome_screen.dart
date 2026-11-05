@@ -75,11 +75,9 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
               final content = LayoutBuilder(
                 builder: (context, box) => Column(
                   children: [
-                    _header(),
+                    _header(landscape: landscape),
                     if (landscape)
-                      Expanded(child: _landscapeBody(performance))
-                    else if (!performance && c.isPlaying)
-                      ..._focusBody()
+                      Expanded(child: _landscapeBody())
                     else ...[
                       SizedBox(
                         height:
@@ -135,27 +133,29 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
   }
 
   /// 상단바: 바탕보다 조금 밝은 색, 얇게.
-  Widget _header() => Container(
+  Widget _header({bool landscape = false}) => Container(
     color: AppColors.header,
     padding: EdgeInsets.fromLTRB(8 + _pad.left, 2 + _pad.top, _pad.right, 2),
     child: Row(
       children: [
-        SegmentedButton<ViewMode>(
-          showSelectedIcon: false,
-          style: SegmentedButton.styleFrom(
-            visualDensity: const VisualDensity(horizontal: -2, vertical: -3),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            selectedBackgroundColor: AppColors.accent,
-            selectedForegroundColor: AppColors.onAccent,
-            textStyle: const TextStyle(fontSize: 13),
+        // 가로는 항상 공연 화면이라 모드 전환을 숨긴다.
+        if (!landscape)
+          SegmentedButton<ViewMode>(
+            showSelectedIcon: false,
+            style: SegmentedButton.styleFrom(
+              visualDensity: const VisualDensity(horizontal: -2, vertical: -3),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              selectedBackgroundColor: AppColors.accent,
+              selectedForegroundColor: AppColors.onAccent,
+              textStyle: const TextStyle(fontSize: 13),
+            ),
+            segments: const [
+              ButtonSegment(value: ViewMode.practice, label: Text('연습')),
+              ButtonSegment(value: ViewMode.performance, label: Text('공연')),
+            ],
+            selected: {c.mode},
+            onSelectionChanged: (s) => c.setMode(s.first),
           ),
-          segments: const [
-            ButtonSegment(value: ViewMode.practice, label: Text('연습')),
-            ButtonSegment(value: ViewMode.performance, label: Text('공연')),
-          ],
-          selected: {c.mode},
-          onSelectionChanged: (s) => c.setMode(s.first),
-        ),
         const Spacer(),
         // 누르면 버튼 바로 아래에 볼륨 막대가 뜬다.
         MenuAnchor(
@@ -211,41 +211,13 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
   );
 
   /// 박 표시창: 주어진 높이를 꽉 채운다. 아래에 1픽셀 박 진행 막대.
-  Widget _display(bool performance, {bool focus = false}) {
+  Widget _display(bool performance) {
     final s = c.settings;
     return Container(
       color: AppColors.display,
       padding: EdgeInsets.fromLTRB(12 + _pad.left, 6, 12 + _pad.right, 0),
       child: Column(
         children: [
-          if (focus)
-            BpmDragArea(
-              onStep: _stepBpm,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Column(
-                  children: [
-                    Text(
-                      '${s.bpm.round()}',
-                      style: const TextStyle(
-                        fontSize: 120,
-                        fontWeight: FontWeight.w200,
-                        height: 1,
-                      ),
-                    ),
-                    Text(
-                      'BPM  ·  ${s.timeSignature.id}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        letterSpacing: 2,
-                        color: AppColors.subtext,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          if (focus) const SizedBox(height: 12),
           if (performance)
             Text(
               '${s.bpm.round()} BPM  ·  ${s.timeSignature.id}',
@@ -274,11 +246,11 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
     );
   }
 
-  /// 가로 화면: 위 박 표시창(얇게) / 아래 [연주목록] [버튼]. 위:아래 = 2:3.
-  /// 오른쪽 버튼 칸은 모드마다 다르다.
-  Widget _landscapeBody(bool performance) => Column(
+  /// 가로 화면 = 공연 화면만 (2026-11-05 사용자 결정. 가로 연습 화면은 보류, CLAUDE.md 참고).
+  /// 위 박 표시창(얇게, BPM·박자 정보 포함) / 아래 [연주목록] [큰 재생 + ⏮⏭]. 위:아래 = 2:3.
+  Widget _landscapeBody() => Column(
     children: [
-      Expanded(flex: 2, child: _display(performance)),
+      Expanded(flex: 2, child: _display(true)),
       Expanded(
         flex: 3,
         child: Padding(
@@ -294,11 +266,7 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
                 child: PlaylistCard(controller: c, fill: true, small: true),
               ),
               const SizedBox(width: 8),
-              Expanded(
-                child: performance
-                    ? _landscapePerformance()
-                    : _landscapePractice(),
-              ),
+              Expanded(child: _landscapePerformance()),
             ],
           ),
         ),
@@ -321,53 +289,6 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
           const SizedBox(width: 6),
           Expanded(child: _neighborButton(1, 44)),
         ],
-      ),
-    ],
-  );
-
-  /// 연습: BPM 조절판 / [박자표 바 + TAP] [재생].
-  Widget _landscapePractice() => Column(
-    children: [
-      _bpmPanel(compact: true),
-      const SizedBox(height: 6),
-      Expanded(
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  TimeSignatureTile(
-                    value: c.settings.timeSignature,
-                    onChanged: c.setTimeSignature,
-                    subdivision: c.settings.subdivision,
-                    onSubdivision: c.setSubdivision,
-                    height: 40,
-                  ),
-                  const SizedBox(height: 6),
-                  Expanded(
-                    child: LayoutBuilder(
-                      builder: (context, box) => _tapButton(box.maxHeight),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Column(
-                children: [
-                  _quickSaveButton(40),
-                  const SizedBox(height: 6),
-                  Expanded(
-                    child: LayoutBuilder(
-                      builder: (context, box) => _playButton(box.maxHeight),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     ],
   );
@@ -515,21 +436,6 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
       ],
     ),
   );
-
-  /// 재생 중 집중 화면 (세로 연습): 박 표시창과 큰 BPM 이 화면 대부분, 아래는 정지 버튼 하나.
-  /// 정지 버튼은 재생 버튼이 있던 오른쪽 아래를 덮도록 전체 너비로 둔다.
-  List<Widget> _focusBody() => [
-    Expanded(child: _display(false, focus: true)),
-    Padding(
-      padding: EdgeInsets.fromLTRB(
-        6 + _pad.left,
-        6,
-        6 + _pad.right,
-        6 + _pad.bottom,
-      ),
-      child: _playButton(110),
-    ),
-  ];
 
   /// 세로 공연: 연주목록 4줄 → [⏮][⏭] → 맨 아래 큰 재생 버튼(남은 높이 전부).
   /// 무대에서 헷갈리지 않게 재생 전후 화면은 같다 (▶ 가 ■ 로만 바뀐다).
@@ -754,19 +660,6 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
                           onSelectionChanged: (s) => c.setSwingStyle(s.first),
                         ),
                       ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('가로로 돌리면 공연 모드'),
-                      subtitle: Text(
-                        '세로로 돌리면 원래 모드로 돌아와요',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.subtext,
-                        ),
-                      ),
-                      value: c.autoPerformanceOnLandscape,
-                      onChanged: c.setAutoPerformanceOnLandscape,
-                    ),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.help_outline),
