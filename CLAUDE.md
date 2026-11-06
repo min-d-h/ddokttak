@@ -156,9 +156,7 @@ Frozen Ape 의 "Tempo" 앱을 닮은 개인용 메트로놈 앱. Flutter 로 만
   코드는 git 커밋 4db28b5 의 `lib/ui/metronome_screen.dart` `_landscapePractice()` 와 ⚙ "가로로 돌리면 공연 모드" 스위치(`autoPerformanceOnLandscape`). 되살리려면 그 커밋에서 가져온다.
   지금: 가로는 연습 모드여도 공연 화면, 가로에서는 상단바 모드 전환을 숨김, 세로로 돌리면 원래 모드로 복귀.
 - 후원 채널 (2026-11-05 조사): GitHub Sponsors 사용 중. 토스아이디(toss.me)는 종료됨(토스 공식 안내 확인, 날짜는 미확인 — 적을 때 날짜 없이). 대체 후보는 미확인 — 카카오페이 송금코드(앱에서 링크 발급 가능한지 사용자 확인 필요, 카카오 프로필 노출), Ko-fi(+PayPal 로 한국 정산 가능한지 확인 필요), Buy Me a Coffee(수수료 5%+, 한국 정산 미확인). 정해지면 FUNDING.yml custom, README 후원 섹션, 앱 ⚙ 링크에 함께 넣는다.
-- **다음에 고칠 것: 재생 시작 지연 + 유튜브 꺼짐** (2026-11-06 분석, 사용자 "들어가서 마저 업데이트" — 수정 전):
-  증상: 유선 이어폰에서도 ▶ 후 첫 박이 늦음 (다른 앱은 즉시), 똑딱을 켜면 백그라운드 유튜브 소리가 꺼짐.
-  원인(코드 순서): main.dart 에서 ① `player.init()`(soloud 엔진, iOS 기본 세션 SoloAmbient=다른 소리 끔 → 유튜브 꺼짐) ② `keepDeviceAwake(true)` ③ 그 뒤에 `AudioSessionController.init()` 으로 Playback+mixWithOthers 설정·활성화 → 켜져 있던 장치를 iOS 가 끊었다 다시 연결하면서 ② 가 무너져 장치가 꺼진 채 남을 수 있음 → ▶ 때 장치 재시작 0.1~0.3초.
-  고칠 것: 1) 세션 설정(Playback+mixWithOthers)을 soloud init **앞**으로 2) 경로 변경·끼어들기 끝·앱 복귀 때 장치 다시 켜기(keepDeviceAwake/startAudioDevice) 3) (선택) ▶ 진단 기록: 장치 상태, 누름→첫 박 ms, 출력 경로를 Documents 파일에 남기고 devicectl copy from 으로 가져오기.
-  확인: 유튜브를 틀어 둔 채 똑딱 켜기 → 유튜브 계속 나옴, ▶ 즉시, 두 소리 함께.
+- **[완료 2026-11-06, 1.0.1 포함] 재생 시작 지연 + 유튜브 꺼짐**: 원인은 main.dart 에서 soloud 엔진을 세션 설정보다 먼저 켠 순서 (엔진이 iOS 기본 SoloAmbient 로 시작해 유튜브를 끄고, 뒤늦은 Playback+mixWithOthers 전환 때 iOS 가 장치를 끊어 keepDeviceAwake 가 무너짐).
+  수정: `AudioSessionController.init()` 을 `player.init()` 보다 먼저, 소리 경로 변경·끼어들기 끝에 `wakeAudio()`(keepDeviceAwake + startAudioDevice), 진단 기록 `lib/diagnostics/audio_diag_log.dart` → 앱 Documents/audio_diag.log (▶ 누름: 장치 깨우기 N ms — 0 근처면 켜져 있었음). 사용자 실기기 확인: 유튜브와 함께 들리고 ▶ 즉시.
+- **[완료 2026-11-06, 1.0.1 포함] 클릭 소리 크게**: `ClickSynth._peak` 0.9→0.98, `drive` 1.15 부드러운 압축(tanh) → 평균 +2.26dB (비프만 +1.4dB). 측정 `flutter test tool/loudness_test.dart`.
 - 함께 남은 것: 이어폰을 뽑으면 멈추기(점검표 알려진 한계).
