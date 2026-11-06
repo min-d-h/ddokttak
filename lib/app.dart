@@ -6,7 +6,7 @@ import 'ui/metronome_screen.dart';
 
 /// 앱 정보 (⚙ 설정 맨 아래에 보인다). pubspec.yaml 의 version 과 맞춘다.
 abstract final class AppInfo {
-  static const version = '1.1.2';
+  static const version = '1.1.3';
   static const author = 'donghyeon Min';
   static const repo = 'github.com/min-d-h/ddokttak';
   static const license = 'GPL-3.0';

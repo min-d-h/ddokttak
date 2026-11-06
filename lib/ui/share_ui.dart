@@ -113,6 +113,13 @@ Future<void> receiveBundle(
     _snack(context, '똑딱 곡 묶음이 아니거나 내용이 깨졌어요');
     return;
   }
+  final repeats = bundle.numberRepeats().renamed;
+  final repeatNote = repeats.isEmpty
+      ? ''
+      : '\n\n같은 곡이 반복되어 '
+            '${repeats.take(3).map((r) => '"${r.$1}"은(는) "${r.$2}"').join(', ')}'
+            '${repeats.length > 3 ? ' 외 ${repeats.length - 3}곡' : ''}'
+            '(으)로 따로 담아요. 순서는 보낸 그대로예요.';
   final names = bundle.songs.map((s) => s.name).take(5).join(', ');
   final more = bundle.songs.length > 5 ? ' 외 ${bundle.songs.length - 5}곡' : '';
   final ok = await showDialog<bool>(
@@ -122,7 +129,7 @@ Future<void> receiveBundle(
       title: Text('곡 ${bundle.songs.length}개를 받을까요?'),
       content: Text(
         '${bundle.folderName ?? '곡 묶음'}\n$names$more\n\n'
-        '새 폴더에 담아요. 지금 있는 곡은 바뀌지 않아요.',
+        '새 폴더에 담아요. 지금 있는 곡은 바뀌지 않아요.$repeatNote',
       ),
       actions: [
         TextButton(
@@ -137,7 +144,7 @@ Future<void> receiveBundle(
     ),
   );
   if (ok != true) return;
-  c.stopIfPlaying();
+  // 받아도 폴더만 바뀌고 지금 곡·BPM 은 그대로라 재생은 멈추지 않는다.
   final r = await c.importBundle(bundle);
   final ctx = AppKeys.navigator.currentContext;
   if (ctx == null || !ctx.mounted) return;
@@ -161,7 +168,8 @@ Future<void> receiveBundle(
   _snack(
     ctx,
     '"${c.folder?.name}" 에 담았어요'
-    '${r.reused > 0 ? ' (이미 있던 곡 ${r.reused}개는 그대로 사용)' : ''}',
+    '${r.reused > 0 ? ' · 이미 있던 곡 ${r.reused}개는 그대로 사용' : ''}'
+    '${r.renamed > 0 ? ' · 반복 곡 ${r.renamed}개는 이름에 번호를 붙였어요' : ''}',
   );
 }
 

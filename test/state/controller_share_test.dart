@@ -84,7 +84,7 @@ void main() {
     )!;
     final libraryBefore = c.library.length;
     final r = await c.importBundle(incoming);
-    expect(r, (added: 2, reused: 2));
+    expect(r, (added: 2, reused: 2, renamed: 0));
     expect(c.library.length, libraryBefore + 2);
     expect(c.folder!.name, '받음 · 내 연주목록');
     final names = [for (final id in c.folder!.songIds) c.songById(id)!.name];
@@ -119,6 +119,35 @@ void main() {
     (c, repo) = await open(path);
     expect(c.library.length, songsBefore);
     expect(c.folders.length, foldersBefore);
+    await repo.close();
+  });
+
+  test('반복된 곡은 "이름 (2)" 로 따로 담겨 순서가 그대로, 다시 받아도 (3) 이 생기지 않는다', () async {
+    final dir = await Directory.systemTemp.createTemp('ddk');
+    var (c, repo) = await open('${dir.path}/r.db');
+    MetronomeSettings bpm(double b) => MetronomeSettings.defaults().withBpm(b);
+    final bundle = SongBundle(
+      folderName: '공연',
+      songs: [
+        (name: 'A', settings: bpm(100)),
+        (name: 'B', settings: bpm(110)),
+        (name: 'A', settings: bpm(100)),
+        (name: 'C', settings: bpm(120)),
+        (name: 'A', settings: bpm(100)),
+      ],
+    );
+    final r = await c.importBundle(bundle);
+    expect(r, (added: 5, reused: 0, renamed: 2));
+    List<String> names() => [
+      for (final id in c.folder!.songIds) c.songById(id)!.name,
+    ];
+    expect(names(), ['A', 'B', 'A (2)', 'C', 'A (3)']);
+
+    final again = await c.importBundle(bundle);
+    expect(again, (added: 0, reused: 5, renamed: 2));
+    expect(names(), ['A', 'B', 'A (2)', 'C', 'A (3)']);
+    expect(c.library.where((s) => s.name.startsWith('A')).length, 3);
+    await c.idle;
     await repo.close();
   });
 }

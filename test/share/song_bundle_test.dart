@@ -42,6 +42,9 @@ void main() {
       '[]',
       '{"app":"other","v":1,"songs":[{"name":"a","settings":{}}]}',
       '{"app":"ddokttak","v":99,"songs":[{"name":"a","settings":{}}]}',
+      '{"app":"ddokttak","v":0,"songs":[{"name":"a","settings":{}}]}',
+      '{"app":"ddokttak","v":-1,"songs":[{"name":"a","settings":{}}]}',
+      '{"app":"ddokttak","v":"1","songs":[{"name":"a","settings":{}}]}',
       '{"app":"ddokttak","v":1,"songs":[]}',
       '{"app":"ddokttak","v":1,"songs":[{"name":"","settings":{}}]}',
       '{"app":"ddokttak","v":1,"songs":[{"name":3,"settings":{}}]}',
@@ -143,6 +146,20 @@ void main() {
       });
       expect(SongBundle.fromJsonText(bad), isNull, reason: '$name');
     }
+  });
+
+  test('반복 번호: 같은 이름이라도 설정이 다르면 다른 곡이라 번호를 붙이지 않는다', () {
+    final d = MetronomeSettings.defaults();
+    final r = SongBundle(
+      folderName: null,
+      songs: [
+        (name: 'A', settings: d),
+        (name: 'A', settings: d.withBpm(90)),
+        (name: 'A', settings: d),
+      ],
+    ).numberRepeats();
+    expect(r.bundle.songs.map((s) => s.name), ['A', 'A', 'A (2)']);
+    expect(r.renamed, [('A', 'A (2)')]);
   });
 
   test('파일 이름에서 쓸 수 없는 글자를 뺀다', () {

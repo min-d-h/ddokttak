@@ -45,7 +45,7 @@ final class SongBundle {
   static SongBundle? _parse(Object? data) {
     if (data is! Map || data['app'] != format) return null;
     final v = data['v'];
-    if (v is! int || v > version) return null; // 더 새 형식은 이 앱이 모른다
+    if (v != version) return null; // 이 앱이 아는 형식(1)만 받는다
     final raw = data['songs'];
     if (raw is! List || raw.isEmpty || raw.length > maxSongs) return null;
     final songs = <({String name, MetronomeSettings settings})>[];
@@ -59,6 +59,27 @@ final class SongBundle {
       ));
     }
     return SongBundle(folderName: _cleanName(data['folder']), songs: songs);
+  }
+
+  /// 한 폴더에는 같은 곡을 한 번만 담을 수 있어서, 묶음 안에서 같은 곡(이름+설정)이 반복되면
+  /// 두 번째부터 "이름 (2)", "이름 (3)" 으로 바꿔 순서를 지킨다. 바꾼 것은 (원래 이름, 새 이름) 목록으로 돌려준다.
+  ({SongBundle bundle, List<(String, String)> renamed}) numberRepeats() {
+    final out = <({String name, MetronomeSettings settings})>[];
+    final renamed = <(String, String)>[];
+    bool taken(String name, MetronomeSettings settings) =>
+        out.any((e) => e.name == name && e.settings == settings);
+    for (final s in songs) {
+      var name = s.name;
+      for (var n = 2; taken(name, s.settings); n++) {
+        name = '${s.name} ($n)';
+      }
+      if (name != s.name) renamed.add((s.name, name));
+      out.add((name: name, settings: s.settings));
+    }
+    return (
+      bundle: SongBundle(folderName: folderName, songs: out),
+      renamed: renamed,
+    );
   }
 
   /// 이름: 문자열이고, 앞뒤 공백·제어 문자를 빼고, 길이를 줄인다. 비면 null.

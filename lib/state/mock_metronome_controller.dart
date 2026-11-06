@@ -740,7 +740,11 @@ final class MockMetronomeController extends MetronomeController {
   /// 이름과 설정이 같은 곡이 보관함에 있으면 그 곡을 쓰고, 이름만 같으면 " (받음)" 을 붙여 새로 만든다.
   /// 곡과 폴더는 한 번에 저장한다. 저장되면 새 폴더를 고르고 (새로 만든 곡 수, 이미 있던 곡 수) 를,
   /// 저장에 실패하면 화면도 받기 전으로 되돌리고 null 을 돌려준다.
-  Future<({int added, int reused})?> importBundle(SongBundle bundle) async {
+  /// 묶음 안에서 반복된 곡은 "이름 (2)" 처럼 따로 담아 순서를 지킨다 ([SongBundle.numberRepeats]).
+  Future<({int added, int reused, int renamed})?> importBundle(
+    SongBundle received,
+  ) async {
+    final (:bundle, :renamed) = received.numberRepeats();
     final newSongs = <Song>[];
     var reused = 0;
     final ids = <String>[];
@@ -750,9 +754,9 @@ final class MockMetronomeController extends MetronomeController {
         ...newSongs,
       ].where((e) => e.name == s.name && e.settings == s.settings);
       if (same.isNotEmpty) {
-        if (newSongs.contains(same.first)) continue; // 묶음 안에서 겹친 곡
+        if (ids.contains(same.first.id)) continue;
         reused++;
-        if (!ids.contains(same.first.id)) ids.add(same.first.id);
+        ids.add(same.first.id);
         continue;
       }
       final names = {
@@ -796,7 +800,7 @@ final class MockMetronomeController extends MetronomeController {
     library.addAll(newSongs);
     folders.add(folder);
     selectFolder(folders.length - 1);
-    return (added: newSongs.length, reused: reused);
+    return (added: newSongs.length, reused: reused, renamed: renamed.length);
   }
 
   // ---- 저장 ----
