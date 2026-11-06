@@ -80,14 +80,16 @@ Frozen Ape 의 "Tempo" 앱을 닮은 개인용 메트로놈 앱. Flutter 로 만
   - 촬영 중 고친 버그: 박자표 바 "4/4 ÷2" 와 "박자" 글자 겹침, 박 칸이 아주 낮을 때 번호 넘침(좁으면 번호 숨김)
   - 테스트 366개
 
-- **1.0.2 (1.0.2+3) — 2026-11-06** (git 태그 `v1.0.2`)
+- **1.1.1 (1.1.1+3) — 2026-11-06** (git 태그 `v1.1.1`. 처음엔 1.0.2 로 올렸다가 새 기능이 들어가 1.1.1 로 바꿈. 옛 태그 v1.0.2 는 GitHub 에 남아 있음)
   - 주고받기 (iPhone 끼리): 연주목록 머리 오른쪽 보내기 버튼 → [파일로 보내기 `.ddokttak` (AirDrop·메시지·파일)] / [QR 로 보여 주기 `ddokttak://import?d=gzip+base64url`]. 받으면 확인 창 → 새 폴더 "받음 · 이름", 이름+설정 같은 곡은 재사용, 이름만 같으면 "이름 (받음)". 한도: 500곡·이름 80자·1MB. 코드 `lib/share/song_bundle.dart`, `lib/ui/share_ui.dart`, iOS `OpenRouter`(AppDelegate.swift, 채널 ddokttak/open) + SceneDelegate URL 전달 + Info.plist(URL 스킴, UTType com.mindongh.ddokttak.bundle)
   - 블루투스 화면 맞춤: iOS `outputLatency + ioBufferDuration`(채널 ddokttak/audio) 만큼 화면 자동 지연 + ⚙ "화면 타이밍 보정" ±250ms (PersistedState.visualOffset 에 저장). 시작·경로 변경·앱 복귀·▶ 때 다시 읽음
   - 이어폰 뽑으면 멈추기 (audio_session becomingNoisy)
   - 폴더 순서 바꾸기 (폴더 창 ≡ 손잡이, `reorderFolders`)
   - 테스트 377개. 실기기 확인 필요: AirDrop/QR 열기, 블루투스 지연 값
-  - (1.0.2 이후, 2026-11-06 GPT 분석 반영) 받은 파일의 글자 칸(박자표·소리·박 세기)에 다른 종류 값이 오면 기본값으로(`MetronomeSettings.fromJson`), 묶음 읽기는 어떤 오류든 거절. 받은 곡+폴더는 한 트랜잭션(`saveImport`)으로 저장하고 실패하면 화면도 되돌리고 "저장하지 못했어요" 창. iOS 는 똑딱 Inbox·임시 폴더의 사본만 지움(`isOwnCopy`).
+  - (2026-11-06 GPT 분석 반영) 받은 파일의 글자 칸(박자표·소리·박 세기)에 다른 종류 값이 오면 기본값으로(`MetronomeSettings.fromJson`), 묶음 읽기는 어떤 오류든 거절. 받은 곡+폴더는 한 트랜잭션(`saveImport`)으로 저장하고 실패하면 화면도 되돌리고 "저장하지 못했어요" 창. iOS 는 똑딱 Inbox·임시 폴더의 사본만 지움(`isOwnCopy`).
   - **할 일: Android 받기** — Android 버전을 만들 때 Intent(.ddokttak 파일, ddokttak:// 링크) 수신을 MainActivity 에 붙이고 채널 ddokttak/open 으로 넘기기 (지금 `OpenRouter.listen` 은 iOS 만).
+
+- **버전 규칙** (2026-11-06 사용자와 정함): 메이저.마이너.패치. 새 기능(예: iPad, 새 주고받기 방식)은 마이너를 올리고(1.2.0), 고치기만 하면 패치를 올린다(1.1.2). 한 번에 나가는 묶음은 태그 하나로.
 
 ## 진행 상황 (설계 문서 4장 기준)
 0단계: 계약 파일 고정

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="version" src="https://img.shields.io/badge/version-1.0.2-4DB3FF?style=flat-square">
+  <img alt="version" src="https://img.shields.io/badge/version-1.1.1-4DB3FF?style=flat-square">
   <img alt="Flutter" src="https://img.shields.io/badge/Flutter-02569B?style=flat-square&logo=flutter&logoColor=white">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-000000?style=flat-square&logo=apple&logoColor=white">
   <img alt="tests" src="https://img.shields.io/badge/tests-377%20passing-2EA44F?style=flat-square">
@@ -213,7 +213,7 @@ xcrun devicectl device install app --device <UDID> build/ios/iphoneos/Runner.app
 | 버전 | 내용 |
 |---|---|
 | **1.0.0** | 정확한 박자 엔진, 박자·세기, 소리 7종, 연습/공연, 곡 보관함·폴더, 스킨 5종, 화면 꺼짐 재생, 앱 아이콘 |
-| **1.0.2** | 주고받기(파일·QR, iPhone 끼리), 블루투스 화면 자동 맞춤 + 보정 막대, 이어폰 뽑으면 멈추기, 폴더 순서 바꾸기 · 받기 오류 수정(이상한 값 처리, 한 번에 저장, 사본만 정리) |
+| **1.1.1** | 주고받기(파일·QR, iPhone 끼리), 블루투스 화면 자동 맞춤 + 보정 막대, 이어폰 뽑으면 멈추기, 폴더 순서 바꾸기 · 받기 오류 수정(이상한 값 처리, 한 번에 저장, 사본만 정리) |
 | **1.0.1** | 저장 버튼 하나, 처음 사용 안내, 기본 곡(60·120), 가로 = 공연, 재생 시작 지연 줄이기(소리 설정 순서), 유튜브·음악 앱과 함께 재생, 클릭 소리 크게(+2dB), 박 나누기(1~4), 재생 중 화면 꺼짐 막기 |
 
 ## 다음에 할 것
