@@ -33,6 +33,10 @@ final class AudioSessionController {
       _session?.interruptionEventStream.map((e) => e.begin) ??
       const Stream.empty();
 
+  /// 소리 경로가 바뀜 (이어폰 연결·해제 등).
+  Stream<void> get routeChanged =>
+      _session?.devicesChangedEventStream.map((_) {}) ?? const Stream.empty();
+
   /// 끼어들기가 끝나면 세션을 다시 켠다 (재생은 사용자가 다시 누른다).
   Future<void> reactivate() async {
     try {

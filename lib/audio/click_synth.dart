@@ -61,7 +61,12 @@ abstract final class AccentMix {
 /// 클릭 소리를 PCM 으로 합성한다. 같은 입력이면 항상 같은 결과를 낸다.
 /// 시작값은 docs/research/05-click-sounds.md 의 표를 따르고, 귀로 들으며 조정한다.
 abstract final class ClickSynth {
-  static const double _peak = 0.9;
+  /// 최대 크기. 1.0 을 넘으면 찌그러지므로 조금 아래로 둔다 (2026-11-06 0.9 → 0.98).
+  static const double _peak = 0.98;
+
+  /// 부드러운 압축 세기. 클릭의 몸통을 두껍게 해서 최대 크기는 그대로 두고 들리는 크기를 키운다.
+  /// 0 이면 압축하지 않는다. 값은 tool 측정으로 정했다 (약 +2.2dB, 70% → 90% 느낌).
+  static double drive = 1.15;
 
   static PcmBuffer render(ClickSoundId sound, {double pitch = 1}) {
     final samples = switch (sound) {
@@ -74,6 +79,7 @@ abstract final class ClickSynth {
       ClickSoundId.digital => _digital(pitch),
     };
     _fadeOut(samples, 0.003);
+    _soften(samples, drive);
     _normalize(samples);
     return PcmBuffer(samples, clickSampleRate);
   }
@@ -182,6 +188,25 @@ abstract final class ClickSynth {
     for (var i = 0; i < n; i++) {
       s[s.length - 1 - i] *= i / n;
     }
+  }
+
+  /// tanh 로 큰 값만 살짝 눌러 몸통을 두껍게 한다 (작은 소리는 거의 그대로).
+  static void _soften(Float32List s, double drive) {
+    if (drive <= 0) return;
+    var max = 0.0;
+    for (final v in s) {
+      max = math.max(max, v.abs());
+    }
+    if (max == 0) return;
+    final norm = _tanh(drive);
+    for (var i = 0; i < s.length; i++) {
+      s[i] = _tanh(drive * s[i] / max) / norm;
+    }
+  }
+
+  static double _tanh(double x) {
+    final e = math.exp(2 * x);
+    return (e - 1) / (e + 1);
   }
 
   static void _normalize(Float32List s) {

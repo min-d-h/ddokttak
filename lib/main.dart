@@ -3,19 +3,29 @@ import 'package:flutter/material.dart';
 import 'app.dart';
 import 'audio/audio_session_controller.dart';
 import 'audio/preview_player.dart';
+import 'diagnostics/audio_diag_log.dart';
 import 'persistence/library_repository.dart';
 import 'state/mock_metronome_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AudioDiagLog.init();
   final player = PreviewPlayer();
   final session = AudioSessionController();
+  // 소리 설정(재생 + 다른 앱과 섞기)을 소리 엔진보다 **먼저** 한다.
+  // 엔진을 먼저 켜면 iOS 기본 설정(다른 소리 끄기)으로 시작해 유튜브 등이 꺼지고,
+  // 나중에 설정을 바꿀 때 iOS 가 장치를 끊었다 다시 연결하면서 켜 둔 장치가 꺼져 ▶ 가 늦어졌다.
+  try {
+    await session.init();
+    AudioDiagLog.write('소리 설정 완료 (재생 + 섞기)');
+  } catch (e) {
+    AudioDiagLog.write('소리 설정 실패: $e');
+  }
   try {
     await player.init();
-    // 엔진을 연 뒤 세션 종류를 정한다 (화면 꺼짐·무음 스위치에도 재생).
-    await session.init();
+    AudioDiagLog.write('소리 엔진 시작');
   } catch (e) {
-    debugPrint('오디오 초기화 실패: $e');
+    AudioDiagLog.write('소리 엔진 시작 실패: $e');
   }
   LibraryRepository? repo;
   try {
@@ -36,11 +46,14 @@ Future<void> main() async {
   );
   // 전화 등이 끼어들면 깔끔하게 멈춘다.
   session.interruptions.listen((began) {
+    AudioDiagLog.write(began ? '끼어들기 시작 (전화 등)' : '끼어들기 끝');
     if (began) {
       controller.stopIfPlaying();
     } else {
-      session.reactivate();
+      session.reactivate().then((_) => controller.wakeAudio('끼어들기 끝'));
     }
   });
+  // 이어폰을 꽂거나 빼는 등 소리 경로가 바뀌면 장치를 다시 켜 둔다.
+  session.routeChanged.listen((_) => controller.wakeAudio('소리 경로 바뀜'));
   runApp(DDokTTakApp(controller: controller));
 }

@@ -26,7 +26,7 @@ void main() {
           expect(v.isFinite, isTrue);
           peak = v.abs() > peak ? v.abs() : peak;
         }
-        expect(peak, closeTo(0.9, 0.001));
+        expect(peak, closeTo(0.98, 0.001));
         expect(pcm.samples.last.abs(), lessThan(0.01));
       });
     }

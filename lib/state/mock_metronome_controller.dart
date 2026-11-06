@@ -8,6 +8,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../app.dart';
 import '../audio/preview_player.dart';
+import '../diagnostics/audio_diag_log.dart';
 import '../domain/beat_accent.dart';
 import '../domain/click_sound.dart';
 import '../domain/folder.dart';
@@ -287,7 +288,10 @@ final class MockMetronomeController extends MetronomeController {
   }
 
   /// 앱이 백그라운드로 가면 더 멀리 미리 예약한다.
+  bool _background = false;
+
   void setBackground(bool background) {
+    _background = background;
     _t?.setBackground(background);
     // 화면에 보이는 동안은 장치를 켜 둬서 ▶ 를 누르면 바로 울리게 한다.
     // 백그라운드에서는 재생 중일 때만 켜 둔다 (재생 중엔 예약된 소리가 장치를 깨워 둔다).
@@ -295,13 +299,24 @@ final class MockMetronomeController extends MetronomeController {
   }
 
   /// 재생 버튼에 손가락이 닿는 순간 장치를 미리 깨운다 (손을 떼면 재생).
+  /// 깨우는 데 걸린 시간을 기록한다: 거의 0ms 면 장치가 이미 켜져 있었고,
+  /// 100ms 이상이면 꺼져 있다가 다시 켜진 것 (▶ 지연의 원인).
   void prewarm() {
     if (!_player.isReady || isPlaying) return;
-    _player.engine.prewarm().then((took) {
-      if (took > const Duration(milliseconds: 5)) {
-        debugPrint('소리 장치 깨우기: ${took.inMilliseconds}ms');
-      }
-    }, onError: (Object e) => debugPrint('소리 장치 깨우기 실패: $e'));
+    _player.engine.prewarm().then(
+      (took) => AudioDiagLog.write('▶ 누름: 장치 깨우기 ${took.inMilliseconds}ms'),
+      onError: (Object e) => AudioDiagLog.write('▶ 누름: 장치 깨우기 실패 $e'),
+    );
+  }
+
+  /// 소리 경로가 바뀌거나 끼어들기가 끝났을 때, 화면에 보이는 중이면 장치를 다시 켜 둔다.
+  void wakeAudio(String why) {
+    if (!_player.isReady) return;
+    if (!_background) _player.engine.keepDeviceAwake(true);
+    _player.engine.prewarm().then(
+      (took) => AudioDiagLog.write('$why → 장치 다시 켜기 ${took.inMilliseconds}ms'),
+      onError: (Object e) => AudioDiagLog.write('$why → 장치 다시 켜기 실패 $e'),
+    );
   }
 
   void _set(MetronomeSettings next) {
