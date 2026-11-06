@@ -48,4 +48,39 @@ void main() {
     expect(find.text('진자 운동'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('연습 화면: 처음 누르면 곡 고르기, 고른 곡을 한 번 더 누르면 이름 바꾸기', (tester) async {
+    tester.view.physicalSize = const Size(393, 759);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final c = MockMetronomeController(PreviewPlayer());
+    await tester.pumpWidget(DDokTTakApp(controller: c));
+    await tester.tap(find.textContaining('왈츠 연습'));
+    await tester.pumpAndSettle();
+    expect(c.currentSongId, 's3');
+    expect(find.text('곡 이름'), findsNothing);
+
+    await tester.tap(find.textContaining('왈츠 연습'));
+    await tester.pumpAndSettle();
+    expect(find.text('곡 이름'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '새 왈츠');
+    await tester.tap(find.text('저장'));
+    await tester.pumpAndSettle();
+    expect(c.songById('s3')!.name, '새 왈츠');
+  });
+
+  testWidgets('공연 화면에서는 고른 곡을 다시 눌러도 이름 창이 뜨지 않는다', (tester) async {
+    tester.view.physicalSize = const Size(393, 759);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final c = MockMetronomeController(PreviewPlayer());
+    c.setMode(ViewMode.performance);
+    await tester.pumpWidget(DDokTTakApp(controller: c));
+    for (var i = 0; i < 2; i++) {
+      await tester.tap(find.textContaining('왈츠 연습'));
+      await tester.pumpAndSettle();
+    }
+    expect(c.currentSongId, 's3');
+    expect(find.text('곡 이름'), findsNothing);
+  });
 }

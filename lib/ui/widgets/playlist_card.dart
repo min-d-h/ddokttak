@@ -8,7 +8,7 @@ import 'name_dialog.dart';
 
 /// ④ 연주목록 = 지금 폴더의 곡들.
 /// 목록 머리: [+ 담기] 곡 보관함 열기, [📁 폴더 이름 ▾] 폴더 바꾸기, [↺] 되돌리기.
-/// 곡 줄: 누르면 불러오기, 길게 누르면 메뉴, 오른쪽 손잡이로 순서 바꾸기.
+/// 곡 줄: 누르면 불러오기(연습 화면에서 고른 곡을 한 번 더 누르면 이름 바꾸기), 길게 누르면 메뉴, 오른쪽 손잡이로 순서 바꾸기.
 class PlaylistCard extends StatelessWidget {
   const PlaylistCard({
     super.key,
@@ -80,7 +80,17 @@ class PlaylistCard extends StatelessWidget {
                 child: Material(
                   color: selected ? AppColors.display : AppColors.card,
                   child: InkWell(
-                    onTap: () => confirmLoad(context, c, song.id),
+                    // 연습 화면에서 이미 고른 곡을 한 번 더 누르면 이름 바꾸기.
+                    // 공연 화면이나 재생 중에는 실수로 이름 창이 뜨지 않게 그냥 둔다.
+                    onTap: () =>
+                        selected && c.mode == ViewMode.practice && !c.isPlaying
+                        ? askName(
+                            context,
+                            '곡 이름',
+                            song.name,
+                            (n) => c.renameSong(song.id, n),
+                          )
+                        : confirmLoad(context, c, song.id),
                     onLongPress: () => _songMenu(context, song.id, song.name),
                     child: Padding(
                       padding: const EdgeInsets.only(left: 16),

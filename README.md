@@ -9,10 +9,10 @@
 </p>
 
 <p align="center">
-  <img alt="version" src="https://img.shields.io/badge/version-1.1.1-4DB3FF?style=flat-square">
+  <img alt="version" src="https://img.shields.io/badge/version-1.1.2-4DB3FF?style=flat-square">
   <img alt="Flutter" src="https://img.shields.io/badge/Flutter-02569B?style=flat-square&logo=flutter&logoColor=white">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-000000?style=flat-square&logo=apple&logoColor=white">
-  <img alt="tests" src="https://img.shields.io/badge/tests-377%20passing-2EA44F?style=flat-square">
+  <img alt="tests" src="https://img.shields.io/badge/tests-379%20passing-2EA44F?style=flat-square">
   <img alt="license" src="https://img.shields.io/badge/license-GPL--3.0-8D98A5?style=flat-square">
 </p>
 
@@ -119,6 +119,8 @@ iPhone 에서 화면을 끄면 클릭이 멈추는 문제가 있었습니다. �
 
 ### 7. 곡 저장 — 단순하게
 "쇼핑하듯 담기" 를 떠올려 **곡 보관함 → 담기 → 폴더(연주목록)** 구조로 만들었습니다. 같은 곡을 여러 폴더에 담을 수 있습니다.
+곡 이름은 연습 화면에서 **고른 곡을 한 번 더 누르면** 바로 바꿀 수 있습니다 (무대에서 실수하지 않도록 공연 화면과 재생 중에는 뜨지 않아요).
+
 저장 방식은 여러 번 바뀌었습니다.
 - 자동 저장 + 되돌리기 → 연습하다 바꾼 템포까지 저장되는 문제
 - 업데이트 / 새로 저장 / 간편 저장 / + 버튼 → 기능은 맞지만 "뭐가 다르지?" 가 생김
@@ -169,7 +171,7 @@ AI 코딩 도구 **Claude Code** 와 대화하며 만들었습니다. 저는 무
 
 진행 방식으로 지킨 것들
 - 큰 변경은 **먼저 글로 확인하고, 수락하면 만든다.**
-- 고칠 때마다 **자동 테스트**를 같이 넣는다 (현재 377개).
+- 고칠 때마다 **자동 테스트**를 같이 넣는다 (현재 379개).
 - 단계마다 멈추고, 결정과 진행 상황은 `CLAUDE.md` 에 남긴다.
 
 ---
@@ -213,6 +215,7 @@ xcrun devicectl device install app --device <UDID> build/ios/iphoneos/Runner.app
 | 버전 | 내용 |
 |---|---|
 | **1.0.0** | 정확한 박자 엔진, 박자·세기, 소리 7종, 연습/공연, 곡 보관함·폴더, 스킨 5종, 화면 꺼짐 재생, 앱 아이콘 |
+| **1.1.2** | 연습 화면 연주목록에서 고른 곡을 한 번 더 누르면 바로 이름 바꾸기 (공연 화면·재생 중에는 안 뜸) |
 | **1.1.1** | 주고받기(파일·QR, iPhone 끼리), 블루투스 화면 자동 맞춤 + 보정 막대, 이어폰 뽑으면 멈추기, 폴더 순서 바꾸기 · 받기 오류 수정(이상한 값 처리, 한 번에 저장, 사본만 정리) |
 | **1.0.1** | 저장 버튼 하나, 처음 사용 안내, 기본 곡(60·120), 가로 = 공연, 재생 시작 지연 줄이기(소리 설정 순서), 유튜브·음악 앱과 함께 재생, 클릭 소리 크게(+2dB), 박 나누기(1~4), 재생 중 화면 꺼짐 막기 |
 
