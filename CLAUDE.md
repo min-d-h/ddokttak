@@ -160,3 +160,6 @@ Frozen Ape 의 "Tempo" 앱을 닮은 개인용 메트로놈 앱. Flutter 로 만
   수정: `AudioSessionController.init()` 을 `player.init()` 보다 먼저, 소리 경로 변경·끼어들기 끝에 `wakeAudio()`(keepDeviceAwake + startAudioDevice), 진단 기록 `lib/diagnostics/audio_diag_log.dart` → 앱 Documents/audio_diag.log (▶ 누름: 장치 깨우기 N ms — 0 근처면 켜져 있었음). 사용자 실기기 확인: 유튜브와 함께 들리고 ▶ 즉시.
 - **[완료 2026-11-06, 1.0.1 포함] 클릭 소리 크게**: `ClickSynth._peak` 0.9→0.98, `drive` 1.15 부드러운 압축(tanh) → 평균 +2.26dB (비프만 +1.4dB). 측정 `flutter test tool/loudness_test.dart`.
 - 함께 남은 것: 이어폰을 뽑으면 멈추기(점검표 알려진 한계).
+- **보류(테스트): 보이는 나누기** (2026-11-06, 사용자 "테스트로 넣은 거니 업데이트 말고 기억"): 소리는 그대로, 화면에서만 박 안을 나눠 흐름을 보여 줌 (박 나누기 켜면 그 수, 아니면 4칸).
+  방식 3가지 — 점(박 칸 아래 점이 차례로), 테두리(화면 가장자리 빛줄기, 120 BPM 초과면 한 마디에 한 바퀴), 차오르기(지금 박 칸이 아래부터 단계로). ⚙ "보이는 나누기 (실험)" 에서 고름.
+  코드: git 가지 `experiment/visual-sub` (커밋 046e391). 되살리기: `git cherry-pick 046e391`. 사용자가 폰에서 비교한 뒤 하나(또는 둘)를 골라 main 에 넣기로.
