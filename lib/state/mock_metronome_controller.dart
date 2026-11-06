@@ -738,40 +738,65 @@ final class MockMetronomeController extends MetronomeController {
 
   /// 받은 곡 묶음을 새 폴더 "받음 · 이름" 에 담는다.
   /// 이름과 설정이 같은 곡이 보관함에 있으면 그 곡을 쓰고, 이름만 같으면 " (받음)" 을 붙여 새로 만든다.
-  /// 새 폴더를 고른 상태로 바꾼다. 돌려주는 값: (새로 만든 곡 수, 이미 있던 곡 수).
-  ({int added, int reused}) importBundle(SongBundle bundle) {
-    var added = 0, reused = 0;
+  /// 곡과 폴더는 한 번에 저장한다. 저장되면 새 폴더를 고르고 (새로 만든 곡 수, 이미 있던 곡 수) 를,
+  /// 저장에 실패하면 화면도 받기 전으로 되돌리고 null 을 돌려준다.
+  Future<({int added, int reused})?> importBundle(SongBundle bundle) async {
+    final newSongs = <Song>[];
+    var reused = 0;
     final ids = <String>[];
     for (final s in bundle.songs) {
-      final same = library.where(
-        (e) => e.name == s.name && e.settings == s.settings,
-      );
+      final same = [
+        ...library,
+        ...newSongs,
+      ].where((e) => e.name == s.name && e.settings == s.settings);
       if (same.isNotEmpty) {
+        if (newSongs.contains(same.first)) continue; // 묶음 안에서 겹친 곡
         reused++;
         if (!ids.contains(same.first.id)) ids.add(same.first.id);
         continue;
       }
-      final taken = library.any((e) => e.name == s.name);
-      final song = Song(
-        id: _newId('s'),
-        name: taken ? _uniqueName('${s.name} (받음)') : s.name,
-        settings: s.settings,
-      );
-      library.add(song);
-      _persist((r) => r.saveSong(song));
+      final names = {
+        for (final e in [...library, ...newSongs]) e.name,
+      };
+      var name = s.name;
+      if (names.contains(name)) {
+        name = '${s.name} (받음)';
+        for (var n = 2; names.contains(name); n++) {
+          name = '${s.name} (받음) ($n)';
+        }
+      }
+      final song = Song(id: _newId('s'), name: name, settings: s.settings);
+      newSongs.add(song);
       ids.add(song.id);
-      added++;
     }
     final base = '받음 · ${bundle.folderName ?? '곡 묶음'}';
-    final names = {for (final f in folders) f.name};
-    var name = base;
-    for (var n = 2; names.contains(name); n++) {
-      name = '$base ($n)';
+    final folderNames = {for (final f in folders) f.name};
+    var folderName = base;
+    for (var n = 2; folderNames.contains(folderName); n++) {
+      folderName = '$base ($n)';
     }
-    folders.add(Folder(id: _newId('f'), name: name, songIds: ids));
-    _saveFolder(folders.length - 1);
+    final folder = Folder(id: _newId('f'), name: folderName, songIds: ids);
+    final position = folders.length;
+
+    final r = repo;
+    if (r != null) {
+      // 앞서 맡긴 저장이 끝난 뒤 한 번에 저장하고, 결과를 기다린다.
+      final done = Completer<bool>();
+      _queue = _queue.then((_) async {
+        try {
+          await r.saveImport(newSongs, folder, position);
+          done.complete(true);
+        } catch (e) {
+          debugPrint('받은 곡 저장 실패: $e');
+          done.complete(false);
+        }
+      });
+      if (!await done.future) return null;
+    }
+    library.addAll(newSongs);
+    folders.add(folder);
     selectFolder(folders.length - 1);
-    return (added: added, reused: reused);
+    return (added: newSongs.length, reused: reused);
   }
 
   // ---- 저장 ----

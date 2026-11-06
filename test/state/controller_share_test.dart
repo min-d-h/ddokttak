@@ -83,7 +83,7 @@ void main() {
       ).toLink(),
     )!;
     final libraryBefore = c.library.length;
-    final r = c.importBundle(incoming);
+    final r = await c.importBundle(incoming);
     expect(r, (added: 2, reused: 2));
     expect(c.library.length, libraryBefore + 2);
     expect(c.folder!.name, '받음 · 내 연주목록');
@@ -91,9 +91,34 @@ void main() {
     expect(names, ['60 · 4/4', '120 · 4/4', '60 · 4/4 (받음)', '새 곡']);
 
     // 한 번 더 받으면 폴더 이름이 겹치지 않는다.
-    c.importBundle(incoming);
+    await c.importBundle(incoming);
     expect(c.folder!.name, '받음 · 내 연주목록 (2)');
     await c.idle;
+    await repo.close();
+  });
+
+  test('받은 곡 저장이 실패하면 보관함·폴더 모두 받기 전 그대로, null', () async {
+    final dir = await Directory.systemTemp.createTemp('ddk');
+    final path = '${dir.path}/x.db';
+    var (c, repo) = await open(path);
+    await c.idle;
+    final songsBefore = c.library.length, foldersBefore = c.folders.length;
+    await repo.close(); // DB 가 닫혀 저장이 실패한다
+    final r = await c.importBundle(
+      SongBundle(
+        folderName: '실패',
+        songs: [
+          (name: '새 곡', settings: MetronomeSettings.defaults().withBpm(90)),
+        ],
+      ),
+    );
+    expect(r, isNull);
+    expect(c.library.length, songsBefore);
+    expect(c.folders.length, foldersBefore);
+
+    (c, repo) = await open(path);
+    expect(c.library.length, songsBefore);
+    expect(c.folders.length, foldersBefore);
     await repo.close();
   });
 }

@@ -120,12 +120,13 @@ final class MetronomeSettings {
   static MetronomeSettings fromJson(Object? json) {
     final d = MetronomeSettings.defaults();
     if (json is! Map) return d;
+    // 받은 파일처럼 밖에서 온 값일 수 있어, 글자 칸에 글자가 아니면 기본값으로.
+    String? text(Object? v) => v is String ? v : null;
     final ts =
-        TimeSignature.tryParse(json['timeSignature'] as String?) ??
-        d.timeSignature;
+        TimeSignature.tryParse(text(json['timeSignature'])) ?? d.timeSignature;
     final rawAccents = json['accents'];
     final accents = rawAccents is List
-        ? [for (final a in rawAccents) BeatAccent.fromName(a as String?)]
+        ? [for (final a in rawAccents) BeatAccent.fromName(text(a))]
         : ts.defaultAccents();
     final bpm = json['bpm'];
     final strength = json['accentStrength'];
@@ -134,7 +135,7 @@ final class MetronomeSettings {
       bpm: bpm is num ? bpm.toDouble() : d.bpm,
       timeSignature: ts,
       accents: accents,
-      sound: ClickSoundId.fromName(json['sound'] as String?),
+      sound: ClickSoundId.fromName(text(json['sound'])),
       accentStrength: strength is num
           ? strength.toDouble()
           : defaultAccentStrength,

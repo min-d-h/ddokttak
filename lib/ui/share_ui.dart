@@ -138,9 +138,26 @@ Future<void> receiveBundle(
   );
   if (ok != true) return;
   c.stopIfPlaying();
-  final r = c.importBundle(bundle);
+  final r = await c.importBundle(bundle);
   final ctx = AppKeys.navigator.currentContext;
   if (ctx == null || !ctx.mounted) return;
+  if (r == null) {
+    await showDialog<void>(
+      context: ctx,
+      builder: (dialog) => AlertDialog(
+        backgroundColor: AppColors.card,
+        title: const Text('저장하지 못했어요'),
+        content: const Text('받은 곡이 하나도 저장되지 않았어요.\n파일이나 QR 로 다시 받아 주세요.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialog),
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+    return;
+  }
   _snack(
     ctx,
     '"${c.folder?.name}" 에 담았어요'

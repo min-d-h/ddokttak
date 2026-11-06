@@ -12,7 +12,7 @@
   <img alt="version" src="https://img.shields.io/badge/version-1.0.2-4DB3FF?style=flat-square">
   <img alt="Flutter" src="https://img.shields.io/badge/Flutter-02569B?style=flat-square&logo=flutter&logoColor=white">
   <img alt="iOS" src="https://img.shields.io/badge/iOS-000000?style=flat-square&logo=apple&logoColor=white">
-  <img alt="tests" src="https://img.shields.io/badge/tests-375%20passing-2EA44F?style=flat-square">
+  <img alt="tests" src="https://img.shields.io/badge/tests-377%20passing-2EA44F?style=flat-square">
   <img alt="license" src="https://img.shields.io/badge/license-GPL--3.0-8D98A5?style=flat-square">
 </p>
 
@@ -132,6 +132,11 @@ iPhone 에서 화면을 끄면 클릭이 멈추는 문제가 있었습니다. �
 
 받는 쪽은 "곡 N개를 받을까요?" 를 확인한 뒤 **새 폴더 "받음 · 폴더 이름"** 에 담깁니다. 지금 있는 곡은 바뀌지 않고, 이름과 설정이 같은 곡은 새로 만들지 않습니다.
 남이 보낸 내용이라 곡 수·이름 길이·크기를 제한하고, 형식이 틀리면 받지 않습니다. 곡 이름과 설정만 들어가고 개인정보는 없습니다.
+
+만든 뒤 다른 AI(GPT)에게 코드 검토를 받아 **오류 세 가지를 잡았습니다.**
+- **이상한 값이 든 파일**: 박자표·소리 칸에 글자 대신 숫자가 들어 있으면 받기가 조용히 실패했어요 → 칸마다 값의 종류를 확인하고, 틀리면 기본값으로 바꿉니다. 제목 속 숫자("120 연습")는 그대로 받아요.
+- **반쯤 저장되는 문제**: 곡을 하나씩 저장하다 중간에 앱이 꺼지면 일부만 남을 수 있었어요 → 곡과 폴더를 **한 번에** 저장하고, 실패하면 "저장하지 못했어요" 를 알립니다.
+- **받은 파일 정리**: 받은 파일을 지울 때 똑딱 안에 만들어진 사본인지 확인한 뒤에만 지웁니다.
 지금은 **똑딱이 깔린 iPhone 끼리만** 됩니다 (Android 버전이 생기면 같은 형식으로 이어집니다).
 
 ### 8. 연습과 공연
@@ -164,7 +169,7 @@ AI 코딩 도구 **Claude Code** 와 대화하며 만들었습니다. 저는 무
 
 진행 방식으로 지킨 것들
 - 큰 변경은 **먼저 글로 확인하고, 수락하면 만든다.**
-- 고칠 때마다 **자동 테스트**를 같이 넣는다 (현재 375개).
+- 고칠 때마다 **자동 테스트**를 같이 넣는다 (현재 377개).
 - 단계마다 멈추고, 결정과 진행 상황은 `CLAUDE.md` 에 남긴다.
 
 ---
@@ -208,7 +213,7 @@ xcrun devicectl device install app --device <UDID> build/ios/iphoneos/Runner.app
 | 버전 | 내용 |
 |---|---|
 | **1.0.0** | 정확한 박자 엔진, 박자·세기, 소리 7종, 연습/공연, 곡 보관함·폴더, 스킨 5종, 화면 꺼짐 재생, 앱 아이콘 |
-| **1.0.2** | 주고받기(파일·QR, iPhone 끼리), 블루투스 화면 자동 맞춤 + 보정 막대, 이어폰 뽑으면 멈추기, 폴더 순서 바꾸기 |
+| **1.0.2** | 주고받기(파일·QR, iPhone 끼리), 블루투스 화면 자동 맞춤 + 보정 막대, 이어폰 뽑으면 멈추기, 폴더 순서 바꾸기 · 받기 오류 수정(이상한 값 처리, 한 번에 저장, 사본만 정리) |
 | **1.0.1** | 저장 버튼 하나, 처음 사용 안내, 기본 곡(60·120), 가로 = 공연, 재생 시작 지연 줄이기(소리 설정 순서), 유튜브·음악 앱과 함께 재생, 클릭 소리 크게(+2dB), 박 나누기(1~4), 재생 중 화면 꺼짐 막기 |
 
 ## 다음에 할 것

@@ -66,6 +66,19 @@ final class OpenRouter {
     channel = c
   }
 
+  private func isOwnCopy(_ url: URL) -> Bool {
+    let fm = FileManager.default
+    var roots = [fm.temporaryDirectory]
+    if let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first {
+      roots.append(docs.appendingPathComponent("Inbox", isDirectory: true))
+    }
+    let path = url.resolvingSymlinksInPath().standardizedFileURL.path
+    return roots.contains { root in
+      let r = root.resolvingSymlinksInPath().standardizedFileURL.path
+      return path.hasPrefix(r.hasSuffix("/") ? r : r + "/")
+    }
+  }
+
   func handle(_ url: URL) {
     var payload: [String: String]?
     if url.isFileURL {
@@ -76,8 +89,10 @@ final class OpenRouter {
       {
         payload = ["kind": "file", "text": text, "name": url.lastPathComponent]
       }
-      // 받은 파일 사본은 남기지 않는다 (Inbox 정리)
-      try? FileManager.default.removeItem(at: url)
+      // iOS 가 똑딱 안(Inbox·임시 폴더)에 만든 사본만 지운다. 다른 곳의 파일은 건드리지 않는다.
+      if isOwnCopy(url) {
+        try? FileManager.default.removeItem(at: url)
+      }
     } else if url.scheme == "ddokttak" {
       payload = ["kind": "link", "text": url.absoluteString]
     }

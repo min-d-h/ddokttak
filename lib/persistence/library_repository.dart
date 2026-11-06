@@ -49,6 +49,9 @@ abstract interface class LibraryRepository {
   /// 폴더 이름·위치·곡 순서를 통째로 저장한다.
   Future<void> saveFolder(Folder folder, int position);
 
+  /// 받은 곡들과 새 폴더를 한 번에 저장한다. 전부 저장되거나 하나도 저장되지 않는다.
+  Future<void> saveImport(List<Song> songs, Folder folder, int position);
+
   /// 폴더만 지운다. 곡은 남는다.
   Future<void> deleteFolder(String id);
   Future<void> setValue(String key, String? value);
@@ -148,13 +151,15 @@ final class SqliteLibraryRepository implements LibraryRepository {
   static MetronomeSettings _decodeSettings(String? raw) {
     try {
       return MetronomeSettings.fromJson(raw == null ? null : jsonDecode(raw));
-    } on FormatException {
-      return MetronomeSettings.defaults();
+    } catch (_) {
+      return MetronomeSettings.defaults(); // 문법 오류든 이상한 값이든
     }
   }
 
   @override
-  Future<void> saveSong(Song song) => _db.rawInsert(
+  Future<void> saveSong(Song song) => _upsertSong(_db, song);
+
+  Future<void> _upsertSong(DatabaseExecutor db, Song song) => db.rawInsert(
     '''
         INSERT INTO songs(id, name, settings, created_at, updated_at)
         VALUES(?, ?, ?, ?, ?)
@@ -171,27 +176,42 @@ final class SqliteLibraryRepository implements LibraryRepository {
 
   @override
   Future<void> saveFolder(Folder folder, int position) =>
+      _db.transaction((txn) => _writeFolder(txn, folder, position));
+
+  @override
+  Future<void> saveImport(List<Song> songs, Folder folder, int position) =>
       _db.transaction((txn) async {
-        await txn.rawInsert(
-          '''
-          INSERT INTO folders(id, name, position) VALUES(?, ?, ?)
-          ON CONFLICT(id) DO UPDATE SET
-            name = excluded.name, position = excluded.position''',
-          [folder.id, folder.name, position],
-        );
-        await txn.delete(
-          'folder_songs',
-          where: 'folder_id = ?',
-          whereArgs: [folder.id],
-        );
-        for (var i = 0; i < folder.songIds.length; i++) {
-          await txn.insert('folder_songs', {
-            'folder_id': folder.id,
-            'song_id': folder.songIds[i],
-            'position': i,
-          });
+        for (final song in songs) {
+          await _upsertSong(txn, song);
         }
+        await _writeFolder(txn, folder, position);
       });
+
+  static Future<void> _writeFolder(
+    DatabaseExecutor txn,
+    Folder folder,
+    int position,
+  ) async {
+    await txn.rawInsert(
+      '''
+      INSERT INTO folders(id, name, position) VALUES(?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        name = excluded.name, position = excluded.position''',
+      [folder.id, folder.name, position],
+    );
+    await txn.delete(
+      'folder_songs',
+      where: 'folder_id = ?',
+      whereArgs: [folder.id],
+    );
+    for (var i = 0; i < folder.songIds.length; i++) {
+      await txn.insert('folder_songs', {
+        'folder_id': folder.id,
+        'song_id': folder.songIds[i],
+        'position': i,
+      });
+    }
+  }
 
   @override
   Future<void> deleteFolder(String id) =>

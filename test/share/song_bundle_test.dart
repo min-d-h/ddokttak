@@ -98,6 +98,53 @@ void main() {
     }
   });
 
+  test('글자 칸에 숫자·목록이 와도 오류 없이 기본값, 제목이 글자가 아니면 거절', () {
+    final b = SongBundle.fromJsonText(
+      jsonEncode({
+        'app': 'ddokttak',
+        'v': 1,
+        'folder': 7,
+        'songs': [
+          {
+            'name': '120 연습',
+            'settings': {
+              'timeSignature': 4,
+              'accents': [1, null, 'accent', []],
+              'sound': ['x'],
+              'bpm': '빠르게',
+              'subdivision': 'two',
+            },
+          },
+          {'name': '두 번째', 'settings': 'not a map'},
+        ],
+      }),
+    );
+    expect(b, isNotNull);
+    expect(b!.folderName, isNull);
+    final s = b.songs.first;
+    expect(s.name, '120 연습'); // 제목 속 숫자는 그대로
+    expect(s.settings.timeSignature.id, '4/4');
+    expect(s.settings.bpm, 120);
+    expect(s.settings.subdivision, 1);
+    expect(b.songs[1].settings, MetronomeSettings.defaults());
+
+    for (final name in [
+      120,
+      null,
+      ['a'],
+      {'a': 1},
+    ]) {
+      final bad = jsonEncode({
+        'app': 'ddokttak',
+        'v': 1,
+        'songs': [
+          {'name': name, 'settings': {}},
+        ],
+      });
+      expect(SongBundle.fromJsonText(bad), isNull, reason: '$name');
+    }
+  });
+
   test('파일 이름에서 쓸 수 없는 글자를 뺀다', () {
     expect(SongBundle.safeFileName('a/b:c?'), 'abc');
     expect(SongBundle.safeFileName(' / '), '똑딱 곡 묶음');

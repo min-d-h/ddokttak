@@ -35,12 +35,14 @@ final class SongBundle {
   /// 파일 내용(JSON 텍스트)을 읽는다. 형식이 아니거나 깨졌으면 null.
   static SongBundle? fromJsonText(String text) {
     if (text.length > maxTextBytes) return null;
-    final Object? data;
     try {
-      data = jsonDecode(text);
-    } on FormatException {
-      return null;
+      return _parse(jsonDecode(text));
+    } catch (_) {
+      return null; // 문법 오류든 예상 못 한 값이든 받지 않는다
     }
+  }
+
+  static SongBundle? _parse(Object? data) {
     if (data is! Map || data['app'] != format) return null;
     final v = data['v'];
     if (v is! int || v > version) return null; // 더 새 형식은 이 앱이 모른다
