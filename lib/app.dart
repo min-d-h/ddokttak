@@ -6,7 +6,7 @@ import 'ui/metronome_screen.dart';
 
 /// 앱 정보 (⚙ 설정 맨 아래에 보인다). pubspec.yaml 의 version 과 맞춘다.
 abstract final class AppInfo {
-  static const version = '1.0.1';
+  static const version = '1.0.2';
   static const author = 'donghyeon Min';
   static const repo = 'github.com/min-d-h/ddokttak';
   static const license = 'GPL-3.0';
@@ -146,6 +146,12 @@ abstract final class AppColors {
   static bool get isLight => skin.brightness == Brightness.light;
 }
 
+/// 화면 밖(파일로 열기 등)에서 창·알림을 띄울 때 쓰는 열쇠.
+abstract final class AppKeys {
+  static final navigator = GlobalKey<NavigatorState>();
+  static final messenger = GlobalKey<ScaffoldMessengerState>();
+}
+
 class DDokTTakApp extends StatelessWidget {
   const DDokTTakApp({super.key, required this.controller});
 
@@ -158,6 +164,8 @@ class DDokTTakApp extends StatelessWidget {
       valueListenable: controller.skinId,
       builder: (context, _, _) => MaterialApp(
         title: '똑딱',
+        navigatorKey: AppKeys.navigator,
+        scaffoldMessengerKey: AppKeys.messenger,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           brightness: AppColors.skin.brightness,

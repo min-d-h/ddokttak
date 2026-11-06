@@ -80,6 +80,13 @@ Frozen Ape 의 "Tempo" 앱을 닮은 개인용 메트로놈 앱. Flutter 로 만
   - 촬영 중 고친 버그: 박자표 바 "4/4 ÷2" 와 "박자" 글자 겹침, 박 칸이 아주 낮을 때 번호 넘침(좁으면 번호 숨김)
   - 테스트 366개
 
+- **1.0.2 (1.0.2+3) — 2026-11-06** (git 태그 `v1.0.2`)
+  - 주고받기 (iPhone 끼리): 연주목록 머리 오른쪽 보내기 버튼 → [파일로 보내기 `.ddokttak` (AirDrop·메시지·파일)] / [QR 로 보여 주기 `ddokttak://import?d=gzip+base64url`]. 받으면 확인 창 → 새 폴더 "받음 · 이름", 이름+설정 같은 곡은 재사용, 이름만 같으면 "이름 (받음)". 한도: 500곡·이름 80자·1MB. 코드 `lib/share/song_bundle.dart`, `lib/ui/share_ui.dart`, iOS `OpenRouter`(AppDelegate.swift, 채널 ddokttak/open) + SceneDelegate URL 전달 + Info.plist(URL 스킴, UTType com.mindongh.ddokttak.bundle)
+  - 블루투스 화면 맞춤: iOS `outputLatency + ioBufferDuration`(채널 ddokttak/audio) 만큼 화면 자동 지연 + ⚙ "화면 타이밍 보정" ±250ms (PersistedState.visualOffset 에 저장). 시작·경로 변경·앱 복귀·▶ 때 다시 읽음
+  - 이어폰 뽑으면 멈추기 (audio_session becomingNoisy)
+  - 폴더 순서 바꾸기 (폴더 창 ≡ 손잡이, `reorderFolders`)
+  - 테스트 375개. 실기기 확인 필요: AirDrop/QR 열기, 블루투스 지연 값
+
 ## 진행 상황 (설계 문서 4장 기준)
 0단계: 계약 파일 고정
 - [x] Flutter 프로젝트 생성, 의존성 추가

@@ -5,7 +5,9 @@ import 'audio/audio_session_controller.dart';
 import 'audio/preview_player.dart';
 import 'diagnostics/audio_diag_log.dart';
 import 'persistence/library_repository.dart';
+import 'platform/native_bridge.dart';
 import 'state/mock_metronome_controller.dart';
+import 'ui/share_ui.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,7 +44,10 @@ Future<void> main() async {
       controller.flush();
       controller.setBackground(true);
     },
-    onShow: () => controller.setBackground(false),
+    onShow: () {
+      controller.setBackground(false);
+      controller.refreshOutput();
+    },
   );
   // 전화 등이 끼어들면 깔끔하게 멈춘다.
   session.interruptions.listen((began) {
@@ -54,6 +59,18 @@ Future<void> main() async {
     }
   });
   // 이어폰을 꽂거나 빼는 등 소리 경로가 바뀌면 장치를 다시 켜 둔다.
-  session.routeChanged.listen((_) => controller.wakeAudio('소리 경로 바뀜'));
+  // 블루투스로 바뀌면 지연이 달라지므로 화면 타이밍도 다시 맞춘다.
+  session.routeChanged.listen((_) {
+    controller.wakeAudio('소리 경로 바뀜');
+    controller.refreshOutput();
+  });
+  // 이어폰을 빼면 스피커로 크게 울리지 않도록 멈춘다.
+  session.becomingNoisy.listen((_) {
+    AudioDiagLog.write('이어폰 빠짐 → 정지');
+    controller.stopIfPlaying();
+  });
+  await controller.refreshOutput();
   runApp(DDokTTakApp(controller: controller));
+  // 곡 묶음 파일이나 QR 링크로 열리면 받을지 묻는다.
+  OpenRouter.listen((kind, text) => receiveBundle(controller, kind, text));
 }

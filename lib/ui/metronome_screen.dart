@@ -660,6 +660,29 @@ class _MetronomeScreenState extends State<MetronomeScreen> {
                           onSelectionChanged: (s) => c.setSwingStyle(s.first),
                         ),
                       ),
+                    const SizedBox(height: 16),
+                    // 블루투스 이어폰은 소리가 늦게 닿는다. 화면을 그만큼 늦춰 맞춘다.
+                    Text(
+                      '화면 타이밍 보정  '
+                      '${c.visualOffset.inMilliseconds > 0 ? '+' : ''}'
+                      '${c.visualOffset.inMilliseconds}ms',
+                    ),
+                    Slider(
+                      key: const Key('visualOffset'),
+                      min: -250,
+                      max: 250,
+                      divisions: 50,
+                      value: c.visualOffset.inMilliseconds.toDouble(),
+                      onChanged: (v) =>
+                          c.setVisualOffset(Duration(milliseconds: v.round())),
+                    ),
+                    Text(
+                      '${c.outputRoute.isEmpty ? '' : '지금 소리: ${c.outputRoute}'
+                                '${c.outputBluetooth ? ' (블루투스)' : ''}, '
+                                '자동 맞춤 ${c.outputLatency.inMilliseconds}ms\n'}'
+                      '화면이 소리보다 빠르면 + 쪽으로, 늦으면 − 쪽으로 옮기세요.',
+                      style: TextStyle(fontSize: 12, color: AppColors.subtext),
+                    ),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.help_outline),

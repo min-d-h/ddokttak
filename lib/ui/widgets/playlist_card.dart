@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app.dart';
 import '../../state/mock_metronome_controller.dart';
 import '../library_screen.dart';
+import '../share_ui.dart';
 import 'name_dialog.dart';
 
 /// ④ 연주목록 = 지금 폴더의 곡들.
@@ -174,18 +175,14 @@ class PlaylistCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                // 저장은 아래 저장 버튼 하나로. 이 자리는 폴더 이름을 가운데에 두려고 같은 크기로 비운다.
-                Visibility(
-                  visible: false,
-                  maintainSize: true,
-                  maintainAnimation: true,
-                  maintainState: true,
-                  child: IconButton(
-                    iconSize: small ? 16 : 24,
-                    visualDensity: small ? VisualDensity.compact : null,
-                    onPressed: null,
-                    icon: const Icon(Icons.library_music_outlined),
-                  ),
+                // 지금 폴더 보내기 (파일·QR). 왼쪽 불러오기와 같은 크기라 폴더 이름이 가운데에 온다.
+                IconButton(
+                  key: const Key('shareFolder'),
+                  iconSize: small ? 16 : 24,
+                  visualDensity: small ? VisualDensity.compact : null,
+                  tooltip: '이 폴더 보내기',
+                  onPressed: () => shareFolder(context, c),
+                  icon: const Icon(Icons.ios_share),
                 ),
               ],
             ),
@@ -231,70 +228,94 @@ class PlaylistCard extends StatelessWidget {
       context: context,
       backgroundColor: AppColors.card,
       isScrollControlled: true,
-      builder: (sheet) => SingleChildScrollView(
-        child: ListenableBuilder(
-          listenable: controller,
-          builder: (context, _) {
-            final c = controller;
-            return SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.all(14),
-                    child: Text('폴더', style: TextStyle(fontSize: 18)),
-                  ),
-                  for (var i = 0; i < c.folders.length; i++)
-                    ListTile(
-                      leading: Icon(
-                        Icons.folder,
-                        color: i == c.currentFolder ? AppColors.accent : null,
-                      ),
-                      title: Text(
-                        c.folders[i].name,
-                        style: TextStyle(
-                          color: i == c.currentFolder ? AppColors.accent : null,
+      builder: (sheet) => ListenableBuilder(
+        listenable: controller,
+        builder: (context, _) {
+          final c = controller;
+          return SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(14),
+                  child: Text('폴더', style: TextStyle(fontSize: 18)),
+                ),
+                // 오른쪽 손잡이(≡)로 끌어 순서를 바꾼다.
+                Flexible(
+                  child: ReorderableListView.builder(
+                    shrinkWrap: true,
+                    buildDefaultDragHandles: false,
+                    itemCount: c.folders.length,
+                    onReorderItem: c.reorderFolders,
+                    itemBuilder: (context, i) {
+                      final f = c.folders[i];
+                      final on = i == c.currentFolder;
+                      return ListTile(
+                        key: ValueKey(f.id),
+                        tileColor: AppColors.card,
+                        leading: Icon(
+                          Icons.folder,
+                          color: on ? AppColors.accent : null,
                         ),
-                      ),
-                      trailing: Text(
-                        '${c.folders[i].songIds.length}곡',
-                        style: TextStyle(color: AppColors.subtext),
-                      ),
-                      onTap: () {
-                        c.selectFolder(i);
-                        Navigator.pop(sheet);
-                      },
-                      onLongPress: () => showActionSheet(context, [
-                        (
-                          Icons.edit,
-                          '폴더 이름 바꾸기',
-                          false,
-                          () => askName(
-                            context,
-                            '폴더 이름',
-                            c.folders[i].name,
-                            (n) => c.renameFolder(i, n),
+                        title: Text(
+                          f.name,
+                          style: TextStyle(color: on ? AppColors.accent : null),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${f.songIds.length}곡',
+                              style: TextStyle(color: AppColors.subtext),
+                            ),
+                            ReorderableDragStartListener(
+                              index: i,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 12),
+                                child: Icon(
+                                  Icons.drag_handle,
+                                  color: AppColors.subtext,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          c.selectFolder(i);
+                          Navigator.pop(sheet);
+                        },
+                        onLongPress: () => showActionSheet(context, [
+                          (
+                            Icons.edit,
+                            '폴더 이름 바꾸기',
+                            false,
+                            () => askName(
+                              context,
+                              '폴더 이름',
+                              f.name,
+                              (n) => c.renameFolder(i, n),
+                            ),
                           ),
-                        ),
-                        (
-                          Icons.delete_outline,
-                          '폴더 삭제 (곡은 보관함에 남아요)',
-                          true,
-                          () => c.deleteFolder(i),
-                        ),
-                      ]),
-                    ),
-                  ListTile(
-                    leading: const Icon(Icons.create_new_folder_outlined),
-                    title: const Text('새 폴더'),
-                    onTap: () =>
-                        askName(context, '새 폴더 이름', '', c.createFolder),
+                          (
+                            Icons.delete_outline,
+                            '폴더 삭제 (곡은 보관함에 남아요)',
+                            true,
+                            () => c.deleteFolder(i),
+                          ),
+                        ]),
+                      );
+                    },
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.create_new_folder_outlined),
+                  title: const Text('새 폴더'),
+                  onTap: () => askName(context, '새 폴더 이름', '', c.createFolder),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

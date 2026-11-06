@@ -37,6 +37,10 @@ final class AudioSessionController {
   Stream<void> get routeChanged =>
       _session?.devicesChangedEventStream.map((_) {}) ?? const Stream.empty();
 
+  /// 이어폰·블루투스가 빠져 소리가 스피커로 넘어가려는 순간.
+  Stream<void> get becomingNoisy =>
+      _session?.becomingNoisyEventStream ?? const Stream.empty();
+
   /// 끼어들기가 끝나면 세션을 다시 켠다 (재생은 사용자가 다시 누른다).
   Future<void> reactivate() async {
     try {

@@ -17,6 +17,8 @@ import '../domain/persisted_state.dart';
 import '../domain/song.dart';
 import '../domain/time_signature.dart';
 import '../persistence/library_repository.dart';
+import '../platform/native_bridge.dart';
+import '../share/song_bundle.dart';
 import '../timeline/ticks.dart';
 import '../transport/soloud_metronome_transport.dart';
 import 'metronome_controller.dart';
@@ -352,7 +354,9 @@ final class MockMetronomeController extends MetronomeController {
         swing.value = null;
       } else {
         _keepScreenOn(true);
+        _applyVisualOffset();
         unawaited(t.start(_settings));
+        unawaited(refreshOutput());
         (_ticker ??= Ticker(_onFrame)).start();
       }
       notifyListeners();
@@ -442,8 +446,52 @@ final class MockMetronomeController extends MetronomeController {
     if (!isPlaying) _player.play(_settings.sound, BeatAccent.accent);
   }
 
+  // ---- 블루투스 화면 맞춤 ----
+
+  /// 소리가 귀에 닿기까지의 지연 (iOS 가 알려 주는 값). 화면 표시를 이만큼 늦춘다.
+  Duration outputLatency = Duration.zero;
+  String outputRoute = '';
+  bool outputBluetooth = false;
+
+  /// 사용자가 슬라이더로 더하는 보정 (±250ms). + 면 화면을 더 늦춘다.
+  Duration visualOffset = Duration.zero;
+
+  /// 지금 소리 경로와 지연을 다시 읽어 화면 타이밍에 반영한다.
+  /// 앱 시작, 소리 경로 바뀜, 앱이 다시 보일 때, 재생 직전에 부른다.
+  Future<void> refreshOutput() async {
+    final info = await AudioOutputInfo.query();
+    if (info == null) return;
+    final changed =
+        info.latency != outputLatency ||
+        info.route != outputRoute ||
+        info.bluetooth != outputBluetooth;
+    outputLatency = info.latency;
+    outputRoute = info.route;
+    outputBluetooth = info.bluetooth;
+    _applyVisualOffset();
+    if (changed) {
+      AudioDiagLog.write(
+        '소리 경로: $outputRoute${outputBluetooth ? ' (블루투스)' : ''}, '
+        '지연 ${outputLatency.inMilliseconds}ms',
+      );
+      notifyListeners();
+    }
+  }
+
+  void _applyVisualOffset() {
+    _transport?.visualOffset = outputLatency + visualOffset;
+  }
+
   @override
-  void setVisualOffset(Duration offset) {}
+  void setVisualOffset(Duration offset) {
+    visualOffset = PersistedState(
+      settings: _settings,
+      visualOffset: offset,
+    ).visualOffset; // ±250ms 로 자른다
+    _applyVisualOffset();
+    _scheduleFlush();
+    notifyListeners();
+  }
 
   void setMode(ViewMode m) {
     mode = m;
@@ -597,6 +645,20 @@ final class MockMetronomeController extends MetronomeController {
     notifyListeners();
   }
 
+  /// 폴더 순서 바꾸기. [newIndex] 는 onReorderItem 이 이미 보정한 위치. 지금 폴더는 그대로 고른 채.
+  void reorderFolders(int oldIndex, int newIndex) {
+    if (oldIndex == newIndex) return;
+    final current = folder;
+    final moved = folders.removeAt(oldIndex);
+    folders.insert(newIndex, moved);
+    final lo = math.min(oldIndex, newIndex), hi = math.max(oldIndex, newIndex);
+    for (var i = lo; i <= hi; i++) {
+      _saveFolder(i);
+    }
+    if (current != null) currentFolder = folders.indexOf(current);
+    notifyListeners();
+  }
+
   void createFolder(String name) {
     folders.add(Folder(id: _newId('f'), name: name));
     _saveFolder(folders.length - 1);
@@ -660,6 +722,58 @@ final class MockMetronomeController extends MetronomeController {
     notifyListeners();
   }
 
+  // ---- 주고받기 ----
+
+  /// 지금 폴더를 곡 묶음으로. 폴더가 비었으면 null.
+  SongBundle? exportFolder() {
+    final f = folder;
+    if (f == null) return null;
+    final songs = [
+      for (final id in f.songIds)
+        if (songById(id) case final s?) (name: s.name, settings: s.settings),
+    ];
+    if (songs.isEmpty) return null;
+    return SongBundle(folderName: f.name, songs: songs);
+  }
+
+  /// 받은 곡 묶음을 새 폴더 "받음 · 이름" 에 담는다.
+  /// 이름과 설정이 같은 곡이 보관함에 있으면 그 곡을 쓰고, 이름만 같으면 " (받음)" 을 붙여 새로 만든다.
+  /// 새 폴더를 고른 상태로 바꾼다. 돌려주는 값: (새로 만든 곡 수, 이미 있던 곡 수).
+  ({int added, int reused}) importBundle(SongBundle bundle) {
+    var added = 0, reused = 0;
+    final ids = <String>[];
+    for (final s in bundle.songs) {
+      final same = library.where(
+        (e) => e.name == s.name && e.settings == s.settings,
+      );
+      if (same.isNotEmpty) {
+        reused++;
+        if (!ids.contains(same.first.id)) ids.add(same.first.id);
+        continue;
+      }
+      final taken = library.any((e) => e.name == s.name);
+      final song = Song(
+        id: _newId('s'),
+        name: taken ? _uniqueName('${s.name} (받음)') : s.name,
+        settings: s.settings,
+      );
+      library.add(song);
+      _persist((r) => r.saveSong(song));
+      ids.add(song.id);
+      added++;
+    }
+    final base = '받음 · ${bundle.folderName ?? '곡 묶음'}';
+    final names = {for (final f in folders) f.name};
+    var name = base;
+    for (var n = 2; names.contains(name); n++) {
+      name = '$base ($n)';
+    }
+    folders.add(Folder(id: _newId('f'), name: name, songIds: ids));
+    _saveFolder(folders.length - 1);
+    selectFolder(folders.length - 1);
+    return (added: added, reused: reused);
+  }
+
   // ---- 저장 ----
 
   String _newId(String prefix) =>
@@ -696,6 +810,7 @@ final class MockMetronomeController extends MetronomeController {
     final state = PersistedState(
       settings: _settings,
       accentsBySignature: _accentsBySignature,
+      visualOffset: visualOffset,
     );
     final stateJson = jsonEncode(state.toJson());
     final song = currentSongId == null ? null : songById(currentSongId!);
@@ -758,6 +873,8 @@ final class MockMetronomeController extends MetronomeController {
     _accentsBySignature
       ..clear()
       ..addAll(state.accentsBySignature);
+    visualOffset = state.visualOffset;
+    _applyVisualOffset();
     final fi = folders.indexWhere(
       (f) => f.id == v[AppStateKey.currentFolderId],
     );
