@@ -80,16 +80,10 @@ class PlaylistCard extends StatelessWidget {
                 child: Material(
                   color: selected ? AppColors.display : AppColors.card,
                   child: InkWell(
-                    // 연습 화면에서 이미 고른 곡을 한 번 더 누르면 이름 바꾸기.
-                    // 공연 화면이나 재생 중에는 실수로 이름 창이 뜨지 않게 그냥 둔다.
-                    onTap: () =>
-                        selected && c.mode == ViewMode.practice && !c.isPlaying
-                        ? askName(
-                            context,
-                            '곡 이름',
-                            song.name,
-                            (n) => c.renameSong(song.id, n),
-                          )
+                    // 연습 화면에서 이미 고른 곡을 한 번 더 누르면 이름 바꾸기 (고친 상태면 저장 메뉴).
+                    // 재생은 그대로 이어진다. 공연 화면에서는 실수로 창이 뜨지 않게 그냥 둔다.
+                    onTap: () => selected && c.mode == ViewMode.practice
+                        ? _selectedSongTap(context, song.id, song.name)
                         : confirmLoad(context, c, song.id),
                     onLongPress: () => _songMenu(context, song.id, song.name),
                     child: Padding(
@@ -210,6 +204,22 @@ class PlaylistCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// 고른 곡을 한 번 더 눌렀을 때. 고치지 않았으면 이름 바꾸기, 고쳤으면
+  /// [이름 바꾸기 / 수정 저장 / 저장하지 않음].
+  void _selectedSongTap(BuildContext context, String id, String name) {
+    void rename() =>
+        askName(context, '곡 이름', name, (n) => controller.renameSong(id, n));
+    if (!controller.isModified) {
+      rename();
+      return;
+    }
+    showActionSheet(context, title: controller.changeSummary, [
+      (Icons.edit, '이름 바꾸기', false, rename),
+      (Icons.save_outlined, '수정 저장', false, controller.updateCurrentSong),
+      (Icons.undo, '저장하지 않음 (저장된 값으로)', false, () => controller.loadSong(id)),
+    ]);
   }
 
   void _songMenu(BuildContext context, String id, String name) =>
@@ -402,7 +412,8 @@ void _snack(BuildContext context, String text, {SnackBarAction? action}) {
     );
 }
 
-/// 저장 안 한 변경이 있으면 물어본 뒤 다른 곡을 불러온다.
+/// 저장 안 한 변경이 있으면 [저장 안 함 / 저장] 을 물은 뒤 다른 곡을 불러온다. 창 밖을 누르면 그대로 머문다.
+/// 재생은 멈추지 않는다.
 Future<void> confirmLoad(
   BuildContext context,
   MockMetronomeController c,
@@ -424,13 +435,9 @@ Future<void> confirmLoad(
           onPressed: () => Navigator.pop(dialog, 'discard'),
           child: const Text('저장 안 함'),
         ),
-        TextButton(
-          onPressed: () => Navigator.pop(dialog, 'new'),
-          child: const Text('새 곡으로'),
-        ),
         FilledButton(
           onPressed: () => Navigator.pop(dialog, 'update'),
-          child: const Text('덮어쓰기'),
+          child: const Text('저장'),
         ),
       ],
     ),
@@ -439,9 +446,6 @@ Future<void> confirmLoad(
   switch (choice) {
     case 'update':
       c.updateCurrentSong();
-      c.loadSong(id);
-    case 'new':
-      _quickSave(context, c);
       c.loadSong(id);
     case 'discard':
       c.loadSong(id);

@@ -37,8 +37,9 @@ void askName(
 /// 아래에서 올라오는 메뉴. (아이콘, 글자, 위험 여부, 동작)
 void showActionSheet(
   BuildContext context,
-  List<(IconData, String, bool, VoidCallback)> actions,
-) {
+  List<(IconData, String, bool, VoidCallback)> actions, {
+  String? title,
+}) {
   showModalBottomSheet<void>(
     context: context,
     backgroundColor: AppColors.card,
@@ -48,6 +49,11 @@ void showActionSheet(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (title != null && title.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+                child: Text(title, style: TextStyle(color: AppColors.subtext)),
+              ),
             for (final (icon, label, danger, onTap) in actions)
               ListTile(
                 leading: Icon(icon, color: danger ? Colors.redAccent : null),

@@ -83,4 +83,70 @@ void main() {
     expect(c.currentSongId, 's3');
     expect(find.text('곡 이름'), findsNothing);
   });
+
+  Future<MockMetronomeController> pumpApp(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(393, 759);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final c = MockMetronomeController(PreviewPlayer());
+    await tester.pumpWidget(DDokTTakApp(controller: c));
+    return c;
+  }
+
+  testWidgets('고친 곡에서 다른 곡을 누르면 [저장 안 함 / 저장] 둘만, 저장하면 덮어쓰고 넘어간다', (
+    tester,
+  ) async {
+    final c = await pumpApp(tester);
+    c.loadSong('s3');
+    final before = c.songById('s3')!.settings.bpm;
+    c.setBpm(before + 4);
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('12/8 블루스'));
+    await tester.pumpAndSettle();
+    expect(find.text('저장 안 함'), findsOneWidget);
+    expect(find.text('새 곡으로'), findsNothing);
+    await tester.tap(find.text('저장'));
+    await tester.pumpAndSettle();
+    expect(c.songById('s3')!.settings.bpm, before + 4);
+    expect(c.currentSongId, isNot('s3'));
+  });
+
+  testWidgets('고친 곡을 한 번 더 누르면 [이름 바꾸기 / 수정 저장 / 저장하지 않음]', (tester) async {
+    final c = await pumpApp(tester);
+    c.loadSong('s3');
+    final saved = c.songById('s3')!.settings.bpm;
+    c.setBpm(saved + 7);
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('왈츠 연습'));
+    await tester.pumpAndSettle();
+    expect(find.text('이름 바꾸기'), findsOneWidget);
+    expect(find.text('수정 저장'), findsOneWidget);
+    await tester.tap(find.textContaining('저장하지 않음'));
+    await tester.pumpAndSettle();
+    expect(c.settings.bpm, saved); // 저장된 값으로
+    expect(c.isModified, isFalse);
+
+    c.setBpm(saved + 3);
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('왈츠 연습'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('수정 저장'));
+    await tester.pumpAndSettle();
+    expect(c.songById('s3')!.settings.bpm, saved + 3);
+    expect(c.isModified, isFalse);
+  });
+
+  testWidgets('연습 화면은 재생 중에도 고른 곡을 다시 누르면 창이 뜨고 재생은 계속된다', (tester) async {
+    final c = await pumpApp(tester);
+    c.loadSong('s3');
+    await tester.pump();
+    c.togglePlay();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.textContaining('왈츠 연습'));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('곡 이름'), findsOneWidget);
+    expect(c.isPlaying, isTrue);
+    c.togglePlay();
+    await tester.pump(const Duration(seconds: 1));
+  });
 }
